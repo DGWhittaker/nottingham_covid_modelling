@@ -2,8 +2,6 @@
 
 This folder contains a python implementation of a SItD (susceptible-infected-deceased) compartmental epidemiological model structured by infectious age.
 
-It also contains a script to download ONS deaths statistics (see the `../data` folder for the latest download).
-
 # Code overview
 ## Installation
 
@@ -12,8 +10,8 @@ We *strongly* recommend installing and running the scripts in a virtual environm
 - `virtualenv folder_name` or if you have both python 2 and 3: `virtualenv --python=python3 folder_name`. Should `virtualenv` not be recognised you may need to call it as `python -m virtualenv folder_name` or (`python -m virtualenv folder_name`). If that doesn't work you may need to install virtualenv first `pip install virtualenv`.
 - go into the virtual environment `cd folder_name` folder
 - and activate `source ./bin/activate` (or `Scripts\activate` on Windows)
-- now get the source code from git: `git clone --recurse git@bitbucket.org:pmzspp/covid19-sp.git`
-- install the required packages by typing `pip install -r requirements.txt` in the `python/` directory to install the required packages
+- now get the source code from git: `git clone https://github.com/DGWhittaker/nottingham_covid_modelling.git`
+- install the required packages by typing `pip install -r requirements.txt` in the `python/` directory
 - Now `pip install -e .` in the `python/` directory to install the *nottingham_covid_modelling* package itself
 
 ## Running
@@ -29,28 +27,24 @@ To run the basic forward model without Google mobility data, type:
 
 - In order to optimise parameters of the Google mobility data forward model to UK death data using different noise models (default is negative binomial), type:
 
-`optimise_model` or `run_all_cmaes` to generate all fits at once (UK ONS data only).
+`optimise_model`.
 
 - Following this, once best fits from CMA-ES have been generated, run:
 
-`mcmc` or `run_all_mcmc` to run all MCMC routines at once (takes a while, so using a multi-core server recommended). Note that this can ONLY be run after `optimise_model`, as best fits from CMA-ES are used as inputs. 
+`mcmc` (takes a while, so using a multi-core server recommended). Note that this can ONLY be run after `optimise_model`, as best fits from CMA-ES are used as inputs. 
 
 - To see diagnostic plots from the MCMC, type:
 
 `plot_mcmc` or `plot_mcmc_series`. For all of the above, the `-o` argument can again be added to use UK ONS deaths data.
 
-- To download the latest deaths numbers from the ONS website run:
-
-`download_ons_data`
-
-By default the file `ONS_daily_deaths.csv` will end up in `../data`. The data is processed from the [ONS website](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/deaths/datasets/weeklyprovisionalfiguresondeathsregisteredinenglandandwales).
+The data used are processed from the [ONS website](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/deaths/datasets/weeklyprovisionalfiguresondeathsregisteredinenglandandwales).
 
 **Please Note:** If your folder names have spaces this might cause issues depending on the platform you're using. e.g. `users/user_name/OneDrive - The University of Nottingham` if things don't run check you don't have spaces in your folder names.
 
 ## Folder structure
-- The `nottingham_covid_modelling/lib` folder contains modules used by the forward model: `data.py` retrieves stored Google mobility data and daily deaths, `equations.py` solves the SIRD model difference equations, `error_measures.py` contains functions to calculate different error measures, `likelihood.py` and `priors.py` contain log-likelihood functions and priors, respectively, for different noise models, and `settings.py` contains default fixed parameter settings for the model.
-- Google mobility data are now taken from `../data` folder and retrieved from [here](https://www.google.com/covid19/mobility/).
-- GOV.UK daily death data are now taken from `../data` and retrieved from [here](https://coronavirus.data.gov.uk).
+- The `nottingham_covid_modelling/lib` folder contains modules used by the forward model: `data.py` retrieves stored Google mobility data and daily deaths, `equations.py` solves the SItD model difference equations, `error_measures.py` contains functions to calculate different error measures, `likelihood.py` and `priors.py` contain log-likelihood functions and priors, respectively, for different noise models, and `settings.py` contains default fixed parameter settings for the model.
+- Google mobility data are retrieved from [here](https://www.google.com/covid19/mobility/).
+- GOV.UK daily death data are retrieved from [here](https://coronavirus.data.gov.uk).
 - Automatic tests for our code are in `nottingham_covid_modelling/tests`
 
 
@@ -78,6 +72,22 @@ This is both a waste of time and it will probably fail (some modules require add
 
 # Reproducing paper results
 ## Running simulations
+
+### Figure 3
+In order to generate and save synthetic data for Figure 3, type the following:
+
+- `SIR_SINR_AGE_model_default -travel -step --outputnumbers FILENAME_WITH_FULL_PATH` 
+
+This will simulate the SItD model and some configuration of the simple models. The observation model will be simulated with a negative binomial distribution and saved as part of the SItD simulation. The exact data for Figure 3 can be found in `SItRDmodel_ONSparams_noise_NB_NO-R_travel_TRUE_step_TRUE.npy` in [nottingham_covid_modelling/out_SIRvsAGEfits](https://bitbucket.org/MHendrix/covid19-mh/src/master/python/nottingham_covid_modelling/out_SIRvsAGEfits/).
+
+To fit the current synthetic data to the three simple models, and the SItD model, type the following:
+
+- `SIR_SINR_fit_AGEdata -r 10 -age -travel -step -fitstep` 
+
+This code authomatically saves the results in [nottingham_covid_modelling/out_SIRvsAGEfits](https://bitbucket.org/MHendrix/covid19-mh/src/master/python/nottingham_covid_modelling/out_SIRvsAGEfits/).
+It will run 10 repeats of the CMA-ES optimization routine. You can change the number of repetitions by "-r N" where N is your desired repeats.
+It saves a PNG figure equivalent to Figure 3 in the paper (also in [nottingham_covid_modelling/out_SIRvsAGEfits](https://bitbucket.org/MHendrix/covid19-mh/src/master/python/nottingham_covid_modelling/out_SIRvsAGEfits/).
+
 
 ### Figure 4
 In order to generate the data used in Figure 4, type the following:
