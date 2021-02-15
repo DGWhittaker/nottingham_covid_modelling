@@ -1,0 +1,18 @@
+usage: download_ons_data [-h] [-download-location DOWNLOAD_LOCATION]
+                         [--output CSV_FILE] [--skip_sanity_check]
+                         [--max_increase_percentage_existing MAX_INCREASE_PERCENTAGE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -download-location DOWNLOAD_LOCATION
+                        Optional: the url for downloading the ons spreadsheet
+                        (defaults to the ons website).
+  --output CSV_FILE     Optional: full path of the file to save the resulting
+                        csv to.
+  --skip_sanity_check   The script sanity checks the generated CVS and
+                        compares it against the existing one in the location
+                        provided, this option allows this check to be skipped.
+  --max_increase_percentage_existing MAX_INCREASE_PERCENTAGE
+                        Percentage the sanity check allows deaths to increase
+                        in downloaded data compared to existing data (default:
+                        5%).

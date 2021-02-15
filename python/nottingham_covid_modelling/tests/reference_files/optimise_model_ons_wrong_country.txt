@@ -1,0 +1,11 @@
+usage: run_optimise [-h] [-nm {Norm,NegBinom,Poiss}] [-o] [-s] [--square]
+                    [--fix_phi] [--fix_sigma] [--fixed_phi FIXED_PHI]
+                    [--flat_priors] [--datafolder DATAFOLDER] [-r REPEATS]
+                    [-d]
+                    [-c {Australia,Canada,France,Germany,India,Italy,New Zealand,United Kingdom,United States,South Korea,Spain,Sweden}]
+                    [--cmaes_fits CMAES_FITS]
+                    [--limit_pints_iterations LIMIT_PINTS_ITERATIONS]
+                    [--sample_from_priors] [--simulate_full] -pto
+                    PARAMS_TO_OPTIMISE [PARAMS_TO_OPTIMISE ...] [--alpha1]
+                    [--optimise_likelihood]
+run_optimise: error: the following arguments are required: -pto/--params_to_optimise

@@ -1,0 +1,52 @@
+usage: run_optimise [-h] [-nm {Norm,NegBinom,Poiss}] [-o] [-s] [--square]
+                    [--fix_phi] [--fix_sigma] [--fixed_phi FIXED_PHI]
+                    [--flat_priors] [--datafolder DATAFOLDER] [-r REPEATS]
+                    [-d]
+                    [-c {Australia,Canada,France,Germany,India,Italy,New Zealand,United Kingdom,United States,South Korea,Spain,Sweden}]
+                    [--cmaes_fits CMAES_FITS]
+                    [--limit_pints_iterations LIMIT_PINTS_ITERATIONS]
+                    [--sample_from_priors] [--simulate_full] -pto
+                    PARAMS_TO_OPTIMISE [PARAMS_TO_OPTIMISE ...] [--alpha1]
+                    [--optimise_likelihood]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -nm {Norm,NegBinom,Poiss}, --noise_model {Norm,NegBinom,Poiss}
+                        which noise model to use
+  -o, --ons_data        whether to use ONS England data or not
+  -s, --simple          whether to use simple model or not (uses rate
+                        distributions)
+  --square              whether to use square lockdown
+  --fix_phi             whether to fix NB dispersion or not
+  --fix_sigma           whether to fix gaussian sigma or not
+  --fixed_phi FIXED_PHI
+                        value of phi
+  --flat_priors         whether to use flat priors
+  --datafolder DATAFOLDER
+                        full path of the folder where the data is located
+                        (default: ../../data/archive/current)
+  -r REPEATS, --repeats REPEATS
+                        number of CMA-ES repeats
+  -d, --detailed_output
+                        whether to output detailed information (CMA-ES logs
+                        and all repeat parameters) or not
+  -c {Australia,Canada,France,Germany,India,Italy,New Zealand,United Kingdom,United States,South Korea,Spain,Sweden}, --country_str {Australia,Canada,France,Germany,India,Italy,New Zealand,United Kingdom,United States,South Korea,Spain,Sweden}
+                        which country to use
+  --cmaes_fits CMAES_FITS
+                        folder to store cmaes fits files in, default:
+                        ./cmaes_fits
+  --limit_pints_iterations LIMIT_PINTS_ITERATIONS
+                        limit pints to a maximum number of iterations. NOTE:
+                        this is mostly for debug and testing purposes, you
+                        probably don't want to use this to get meaningful
+                        results!
+  --sample_from_priors  whether to sample once from priors or not (default is
+                        to iterate 1000 times to get good log-likelihood)
+  --simulate_full       whether to use all Google data (default is 150 days)
+  -pto PARAMS_TO_OPTIMISE [PARAMS_TO_OPTIMISE ...], --params_to_optimise PARAMS_TO_OPTIMISE [PARAMS_TO_OPTIMISE ...]
+                        which parameters to optimise, e.g. -pto rho Iinit1
+                        lockdown_baseline
+  --alpha1              whether or not to do alpha=1 simulation
+  --optimise_likelihood
+                        whether to optimise log-likelihood instead of log-
+                        posterior

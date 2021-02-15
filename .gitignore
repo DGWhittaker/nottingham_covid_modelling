@@ -1,0 +1,11 @@
+.DS_Store
+**.pyc
+/*/.pytest_cache
+__pycache__
+.coverage
+/*/*.egg-info
+**/outcmaes/
+/python/*/build
+python/outcmaes
+python/.vscode/*
+folder_name
