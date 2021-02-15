@@ -1,0 +1,16 @@
+usage: forward_model [-h] [--outputgraph OUTPUTGRAPH] [--maxtime MAXTIME]
+                     [--startmonth STARTMONTH] [--outputnumbers OUTPUTNUMBERS]
+                     [-I0 I0] [-rho RHO]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --outputgraph OUTPUTGRAPH
+                        Output path for saving the graph (default='' i.e. the
+                        graph is not saved)
+  --maxtime MAXTIME     Maximum simulation time (default=240)
+  --startmonth STARTMONTH
+                        Starting month for simulation (default=Mar20)
+  --outputnumbers OUTPUTNUMBERS
+                        Output path for saving the numbers
+  -I0 I0                Initial number of infecteds (default=1000)
+  -rho RHO              Reproduction number (default=2.4)

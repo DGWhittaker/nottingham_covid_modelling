@@ -1,0 +1,34 @@
+usage: find_good_model [-h] [-nm {Norm,NegBinom,Poiss}] [-o] [-s] [--square]
+                       [--fix_phi] [--fix_sigma] [--fixed_phi FIXED_PHI]
+                       [--flat_priors] [--datafolder DATAFOLDER]
+                       [-c {Australia,Canada,France,Germany,India,Italy,New Zealand,United Kingdom,United States,South Korea,Spain,Sweden}]
+                       [--nmodels NMODELS] [--outputnumbers OUTPUTNUMBERS]
+                       [--simulate_full] -pto PARAMS_TO_OPTIMISE
+                       [PARAMS_TO_OPTIMISE ...]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -nm {Norm,NegBinom,Poiss}, --noise_model {Norm,NegBinom,Poiss}
+                        which noise model to use
+  -o, --ons_data        whether to use ONS England data or not
+  -s, --simple          whether to use simple model or not (uses rate
+                        distributions)
+  --square              whether to use square lockdown
+  --fix_phi             whether to fix NB dispersion or not
+  --fix_sigma           whether to fix gaussian sigma or not
+  --fixed_phi FIXED_PHI
+                        value of phi
+  --flat_priors         whether to use flat priors
+  --datafolder DATAFOLDER
+                        full path of the folder where the data is located
+                        (default: ../../data/archive/current)
+  -c {Australia,Canada,France,Germany,India,Italy,New Zealand,United Kingdom,United States,South Korea,Spain,Sweden}, --country_str {Australia,Canada,France,Germany,India,Italy,New Zealand,United Kingdom,United States,South Korea,Spain,Sweden}
+                        which country to use (default: United Kingdom)
+  --nmodels NMODELS     number of models to simulate (at least 10, default:
+                        10000)
+  --outputnumbers OUTPUTNUMBERS
+                        Output path for saving the numbers
+  --simulate_full       whether to use all Google data (default is 150 days)
+  -pto PARAMS_TO_OPTIMISE [PARAMS_TO_OPTIMISE ...], --params_to_optimise PARAMS_TO_OPTIMISE [PARAMS_TO_OPTIMISE ...]
+                        which parameters to optimise, e.g. -pto rho Iinit1
+                        lockdown_baseline
