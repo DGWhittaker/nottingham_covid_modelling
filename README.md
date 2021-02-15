@@ -4,6 +4,7 @@ This folder contains a python implementation of a SItD (susceptible-infected-dec
 The code herein is associated with the paper:
 
 ***"Uncertainty and error in SARS-CoV-2 epidemiological parameters inferred from population-level epidemic models"*** (Currently under review). Whittaker, D. G.\*, Herrera-Reyes, A. D.\*, Hendrix, M., Owen, M. R., Band, L. R., Mirams, G. R., Bolton, K. J., Preston, S. P.
+
 \* joint first authors
 
 # Code overview
