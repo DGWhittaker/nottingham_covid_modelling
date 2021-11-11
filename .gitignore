@@ -1,11 +1,14 @@
 .DS_Store
 **.pyc
 /*/.pytest_cache
+.pytest_cache
 __pycache__
 .coverage
 /*/*.egg-info
+/*.egg-info
+*.egg-info
 **/outcmaes/
-/python/*/build
-python/outcmaes
-python/.vscode/*
+*/build
+outcmaes
+.vscode/*
 folder_name
