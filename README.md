@@ -12,12 +12,12 @@ The code herein is associated with the paper:
 
 We *strongly* recommend installing and running the scripts in a virtual environment to avoid version conflicts and make sure all paths work as expected. In order to do this, follow these steps:
 
-- `virtualenv folder_name` or if you have both python 2 and 3: `virtualenv --python=python3 folder_name`. Should `virtualenv` not be recognised you may need to call it as `python -m virtualenv folder_name` or (`python -m virtualenv folder_name`). If that doesn't work you may need to install virtualenv first `pip install virtualenv`.
+- `virtualenv folder_name` or if you have both python 2 and 3: `virtualenv --python=python3 folder_name`. Should `virtualenv` not be recognised you may need to call it as `python -m virtualenv folder_name`. If that doesn't work you may need to install virtualenv first `pip install virtualenv`.
 - go into the virtual environment `cd folder_name` folder
 - and activate `source ./bin/activate` (or `Scripts\activate` on Windows)
 - now get the source code from git: `git clone https://github.com/DGWhittaker/nottingham_covid_modelling.git`
-- install the required packages by typing `pip install -r requirements.txt` in the `python/` directory
-- Now `pip install -e .` in the `python/` directory to install the *nottingham_covid_modelling* package itself
+- install the required packages by typing `pip install -r requirements.txt`
+- Now `pip install -e .` to install the *nottingham_covid_modelling* package itself
 
 ## Running
 - Now you have a number of different scripts available, which can be run from any directory once the *nottingham_covid_modelling* package has been installed. Each of these can be run with the `-h`  flag to get more information about available command line arguments.
