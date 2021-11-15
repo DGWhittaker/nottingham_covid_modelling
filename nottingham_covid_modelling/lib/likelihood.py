@@ -120,3 +120,55 @@ class Poiss_LogLikelihood(_LogLikelihood):
 
         f = np.sum(poisson.logpmf(y, m))
         return f
+
+
+def NBloglike_simulatedData(y, m, p_dict, p):
+        '''
+        Returns negative binomial log-likelihood
+
+        m is model solution
+        y is observed data
+        phi is dispersion parameter to be optimised, such that variance = m + phi * m**2
+        '''
+        f = 0
+        fix_flag = False
+        NB_n = 1 / p_dict['negative_binomial_phi']
+        for i in range(len(m)):
+            mu = m[i]
+            if mu < fix_num and y[i+p.day_1st_death_after_150220] > 0:
+                mu = fix_num
+                if not fix_flag and debug:
+                    print('WARNING: Numerical fix activated.\nModel solution prevented from going below ' + \
+                        str(fix_num) + ' to avoid infinite log-likelihood.')
+                fix_flag = True        
+            NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
+            f += nbinom.logpmf(y[i+p.day_1st_death_after_150220], NB_n, NB_p)
+        return -f
+
+class SIRD_NBLogLike(pints.LogPDF):
+    def __init__(self, settings, deaths,
+                 parameters_to_optimise=['rho', 'Iinit1', 'lockdown_baseline', 'lockdown_fatigue'], 
+                 travel_data=True):
+        self._p = settings
+        self._y = deaths
+        self._travel_data = travel_data
+        self.parameter_labels = parameters_to_optimise
+        self.flat_priors = self._p.flat_priors
+
+        if self._p.fix_phi:
+            self.parameter_labels.remove('negative_binomial_phi')
+
+    def __call__(self, x):
+
+        '''
+        Preparation for returning log-likelihood
+
+        :returns params_dict, m, y where param_dict is a dict of parameters, m the model solution, y the observed data
+        '''
+        m = get_model_solution(self._p, param_dict, self._travel_data)
+        assert len(m) == len(self._y), \
+            "Mismatch between deaths and model_solution, have you used the DataLoader to load number of deaths?"
+        return param_dict, m, self._y
+
+    def n_parameters(self):
+        return len(self.parameter_labels)
