@@ -7,7 +7,7 @@ import numpy as np
 from scipy.stats import nbinom
 from nottingham_covid_modelling.lib._save_to_file import save_np_to_file
 # Load project modules
-from nottingham_covid_modelling.lib.equations import solve_SIR_difference_equations, solve_difference_equations, solve_SINR_difference_equations, store_rate_vectors, step, tanh_spline
+from nottingham_covid_modelling.lib.equations import solve_SIR_difference_equations, solve_difference_equations, solve_SIUR_difference_equations, store_rate_vectors, step, tanh_spline
 from nottingham_covid_modelling.lib.settings import Params
 from nottingham_covid_modelling.lib.ratefunctions import calculate_R_instantaneous
 
@@ -125,7 +125,7 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
     #p.lockdown_offset = 46.1
     p.alpha = step(p, lgoog_data = p.maxtime + 1  - p.numeric_max_age, parameters_dictionary = default_params)
     
-    S_u, I_u, Inew_u, N_u, R_u, D_u = solve_SINR_difference_equations(p, default_params_SIR, travel_data)
+    S_u, I_u, Inew_u, N_u, R_u, D_u = solve_SIUR_difference_equations(p, default_params_SIR, travel_data)
     R_0_u = (rho_SIR * p.beta * 1) / p.theta
     R_eff_u = ((rho_SIR * p.beta * p.alpha[:-p.extra_days_to_simulate]) / p.theta) * (S_u / p.N)
     print('SIUR')
