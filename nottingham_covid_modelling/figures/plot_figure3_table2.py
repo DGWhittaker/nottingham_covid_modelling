@@ -13,7 +13,7 @@ from nottingham_covid_modelling import MODULE_DIR
 # Load project modules
 from nottingham_covid_modelling.lib._command_line_args import NOISE_MODEL_MAPPING, POPULATION
 from nottingham_covid_modelling.lib.data import DataLoader
-from nottingham_covid_modelling.lib.equations import solve_difference_equations, solve_SIR_difference_equations, store_rate_vectors, solve_SINR_difference_equations, step
+from nottingham_covid_modelling.lib.equations import solve_difference_equations, solve_SIR_difference_equations, store_rate_vectors, solve_SIUR_difference_equations, step
 from nottingham_covid_modelling.lib.settings import Params, get_file_name_suffix
 from nottingham_covid_modelling.lib.error_measures import calculate_RMSE
 from nottingham_covid_modelling.lib.ratefunctions import calculate_R_instantaneous
@@ -152,7 +152,7 @@ if p.square_lockdown:
 else:
     alpha_SINR = np.ones(p.maxtime + 1 + p.extra_days_to_simulate)
 # Run forward model
-S_u, I_u, Inew_u, N_u, R_u, D_u = solve_SINR_difference_equations(p, p_dict_SINR, travel_data)
+S_u, I_u, Inew_u, N_u, R_u, D_u = solve_SIUR_difference_equations(p, p_dict_SINR, travel_data)
 rho_SINR = p_dict_SINR.get('rho', p.rho)
 Iinit_SINR = p_dict_SINR.get('Iinit1', p.Iinit1)
 theta_fit_SINR = p_dict_SINR.get('theta',theta_SINR)
