@@ -12,7 +12,7 @@ from nottingham_covid_modelling import MODULE_DIR
 # Load project modules
 from nottingham_covid_modelling.lib._command_line_args import NOISE_MODEL_MAPPING, POPULATION
 from nottingham_covid_modelling.lib.data import DataLoader
-from nottingham_covid_modelling.lib.equations import solve_difference_equations, solve_SIR_difference_equations, store_rate_vectors, solve_SIUR_difference_equations, step, get_model_SIUR_solution
+from nottingham_covid_modelling.lib.equations import solve_difference_equations, solve_SIR_difference_equations, store_rate_vectors, solve_SIUR_difference_equations, step, get_model_SIUR_solution, get_model_solution, get_model_SIR_solution
 from nottingham_covid_modelling.lib.settings import Params, get_file_name_suffix
 from nottingham_covid_modelling.lib.error_measures import calculate_RMSE
 from nottingham_covid_modelling.lib.ratefunctions import calculate_R_instantaneous
@@ -32,6 +32,7 @@ def run_optimise():
 
     # At the moment, syntethic data sets 2-9 have travel and step options only. There is only one data sets without step and one with neither travel nor step.
 
+    debuging_flag = True
     args = parser.parse_args()
     repeats = args.repeats
     FitAge = args.age_fit
@@ -40,6 +41,13 @@ def run_optimise():
     FitStep = args.fit_step
     SyntDataNum_file = args.syndata_num
     
+    if debuging_flag:
+        FitAge = True
+        repeats = 5
+        Fitparams = 'full'
+        FitStep = True
+        #np.random.seed(100)
+
     # folder to load/ save data
     if SyntDataNum_file == 1: #Original default syntethic data
         folder_path =  os.path.join(MODULE_DIR, 'out_SIRvsAGEfits')
@@ -57,6 +65,7 @@ def run_optimise():
         parameters_to_optimise_SIR = ['rho', 'Iinit1','negative_binomial_phi']
         parameters_to_optimise_SINR = FITING_MAPPING[Fitparams]
         parameters_to_optimise_SIRDeltaD = ['rho', 'Iinit1','negative_binomial_phi']
+
     if FitStep:
         parameters_to_optimise_SIR.extend(['lockdown_baseline', 'lockdown_offset'])
         parameters_to_optimise_SIRDeltaD.extend(['lockdown_baseline', 'lockdown_offset'])
@@ -96,11 +105,6 @@ def run_optimise():
         data_filename = 'SItRDmodel_ONSparams_noise_NB_NO-R_travel_FALSE.npy'
         travel_label = '_travel_FALSE'
 
-    # Filenames:
-    filename_SIR = os.path.join(folder_path, get_file_name_suffix(p, 'syntheticSItRD-'+str(SyntDataNum_file)+'-'+Noise_flag, 'SIR-'+ Fitparams + '-fitStep-' + str(FitStep) + '-maxtime-' + str(maxtime_fit), parameters_to_optimise_SIR) + travel_label)
-    filename_SIRDeltaD = os.path.join(folder_path, get_file_name_suffix(p, 'syntheticSItRD-'+str(SyntDataNum_file)+'-'+Noise_flag, 'SIRDeltaD-'+ Fitparams + '-fitStep-' + str(FitStep) + '-maxtime-' + str(maxtime_fit), parameters_to_optimise_SIR) + travel_label)
-    filename_SINR = os.path.join(folder_path, get_file_name_suffix(p, 'syntheticSItRD-'+str(SyntDataNum_file)+'-'+Noise_flag, 'SINR-'+ Fitparams +  '-fitStep-' + str(FitStep) + '-maxtime-' + str(maxtime_fit), parameters_to_optimise_SINR) + travel_label)
-    filename_plot = os.path.join(folder_path, 'SyntheticSItD-sim-'+str(SyntDataNum_file)+'-fit-' + Noise_flag + Fitparams + '-fitStep-' + str(FitStep) + '-fitSItR-' + str(FitAge) + '-maxtime-' + str(maxtime_fit) + travel_label)
     
 
 
@@ -133,11 +137,11 @@ def run_optimise():
     p.maxtime = p.maxtime + p.numeric_max_age + p.extra_days_to_simulate #D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate)]
     p.day_1st_death_after_150220 = 22
     # Fix random seed for reproducibility
-    #np.random.seed(100) # not sure if it's working
+    # np.random.seed(100) # not sure if it's working
     
     
     # NB likelihoods:
-    def NBlike_SItRD(params, p, parameters_dictionary, travel_data, data_D):
+    def NBlike_SItRD_old(params, p, parameters_dictionary, data_D, travel_data):
         p_dict = dict(zip(parameters_dictionary, params))
         _, _, _, D, _ = solve_difference_equations(p, parameters_dictionary = p_dict, travel_data = travel_data)
         D = D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate)]
@@ -150,7 +154,7 @@ def run_optimise():
             NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
             f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220], NB_n, NB_p)
         return -f
-    def NBlike_SIR(params, p, parameters_dictionary, data_D, travel_data):
+    def NBlike_SIR_old(params, p, parameters_dictionary, data_D, travel_data):
         p_dict = dict(zip(parameters_dictionary, params))
         _, _, _, _, D = solve_SIR_difference_equations(p, parameters_dictionary = p_dict, travel_data = travel_data)
         DeltaD = p_dict.get('DeltaD', p.DeltaD)
@@ -164,7 +168,7 @@ def run_optimise():
             NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
             f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220], NB_n, NB_p)
         return -f
-    def NBlike_SINR(params, p, parameters_dictionary, data_D, travel_data):
+    def NBlike_SIUR_old(params, p, parameters_dictionary, data_D, travel_data):
         p_dict = dict(zip(parameters_dictionary, params))
         _, _, _, _, _, D = solve_SIUR_difference_equations(p, parameters_dictionary = p_dict, travel_data = travel_data)
         D = D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate)]
@@ -177,7 +181,59 @@ def run_optimise():
             NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
             f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220],NB_n, NB_p)
         return -f
-    
+
+
+    def NBlike_SItRD(params, p, parameters_dictionary, data_D, travel_data):
+        p_dict = dict(zip(parameters_dictionary, params))
+        D = get_model_solution(p, parameters_dictionary = p_dict, travel_data = travel_data)
+        f = 0
+        NB_n = 1 / p_dict['negative_binomial_phi']
+        for i in range(len(D)):
+            mu = D[i]
+            if mu < neg_bin_fix_mu and data_D[i+p.day_1st_death_after_150220] > 0:
+                mu = neg_bin_fix_mu
+            NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
+            f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220], NB_n, NB_p)
+        return -f
+    def NBlike_SIR(params, p, parameters_dictionary, data_D, travel_data):
+        p_dict = dict(zip(parameters_dictionary, params))
+        D = get_model_SIR_solution(p, parameters_dictionary = p_dict, travel_data = travel_data)
+        f = 0
+        NB_n = 1 / p_dict['negative_binomial_phi']
+        for i in range(len(D)):
+            mu = D[i]
+            if mu < neg_bin_fix_mu and data_D[i+p.day_1st_death_after_150220] > 0:
+                mu = neg_bin_fix_mu
+            NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
+            f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220], NB_n, NB_p)
+        return -f
+    def NBlike_SIUR(params, p, parameters_dictionary, data_D, travel_data):
+        p_dict = dict(zip(parameters_dictionary, params))
+        D = get_model_SIUR_solution(p, parameters_dictionary = p_dict, travel_data = travel_data)
+        f = 0
+        NB_n = 1 / p_dict['negative_binomial_phi']
+        for i in range(len(D)):
+            mu = D[i]
+            if mu < neg_bin_fix_mu and data_D[i+p.day_1st_death_after_150220] > 0:
+                mu = neg_bin_fix_mu
+            NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
+            f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220],NB_n, NB_p)
+        return -f
+
+
+    def NBneglogL_models(params, p, parameters_dictionary, data_D, travel_data, model_func):
+        p_dict = dict(zip(parameters_dictionary, params))
+        D = model_func(p, parameters_dictionary = p_dict, travel_data = travel_data)
+        f = 0
+        NB_n = 1 / p_dict['negative_binomial_phi']
+        for i in range(len(D)):
+            mu = D[i]
+            if mu < neg_bin_fix_mu and data_D[i+p.day_1st_death_after_150220] > 0:
+                mu = neg_bin_fix_mu
+            NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
+            f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220],NB_n, NB_p)
+        return -f
+
     # Redefinition of parameters for SIR and SINR ( 1/mean)
     beta_SIR = 1
     theta_SIR = 1 / p.beta_mean
@@ -243,11 +299,14 @@ def run_optimise():
         optsSIR = cma.CMAOptions()
         optsSIR.set("bounds", bounds_SIR)
         optsSIR.set("CMA_stds", stds_SIR)
+        #if debuging_flag:
+            #optsSIR.set("maxfevals",10)
+            #optsSIR.set("seed", 100)
         x0_SIR = np.random.uniform(bounds_SIR[0][0], bounds_SIR[1][0])
         for j in range(len(bounds_SIR[0])-1):
             x0_SIR = np.append(x0_SIR, np.random.uniform(bounds_SIR[0][j+1], bounds_SIR[1][j+1]))
         print(x0_SIR)
-        es = cma.fmin(NBlike_SIR, x0_SIR, sigma0=1, args=(p, parameters_to_optimise_SIR, data_D, travel_data), options = optsSIR)
+        es = cma.fmin(NBneglogL_models, x0_SIR, sigma0=1, args=(p, parameters_to_optimise_SIR, data_D, travel_data, get_model_SIR_solution), options = optsSIR)
         parametersSIR.append(es[0])
         scoresSIR.append(es[1])
         stddevSIR.append(es[6])
@@ -262,16 +321,7 @@ def run_optimise():
     # Extract best
     obtained_parameters_SIR = parametersSIR[0]
     obtained_stdev_SIR = stddevSIR[0]
-    # Store SIR resutls
-    print('Storing default fit SIR model best result...')
-    with open(filename_SIR + '.txt', 'w') as f:
-        for x in obtained_parameters_SIR:
-            f.write(pints.strfloat(x) + '\n')
-
-    print('Storing default fit all_SIR SIR model errors...')
-    with open(filename_SIR + '-errors.txt', 'w') as f:
-        for score in scoresSIR:
-            f.write(pints.strfloat(-score) + '\n')
+    
 
     # Store simulations for plotting
     p_dict_SIR = dict(zip(parameters_to_optimise_SIR, obtained_parameters_SIR))
@@ -305,11 +355,14 @@ def run_optimise():
         optsSIRDeltaD = cma.CMAOptions()
         optsSIRDeltaD.set("bounds", bounds_SIRDeltaD)
         optsSIRDeltaD.set("CMA_stds", stds_SIRDeltaD)
+        #if debuging_flag:
+            #optsSIRDeltaD.set("maxfevals",10)
+            #optsSIRDeltaD.set("seed", 100)
         x0_SIRDeltaD = np.random.uniform(bounds_SIRDeltaD[0][0], bounds_SIRDeltaD[1][0])
         for j in range(len(bounds_SIRDeltaD[0])-1):
             x0_SIRDeltaD = np.append(x0_SIRDeltaD, np.random.uniform(bounds_SIRDeltaD[0][j+1], bounds_SIRDeltaD[1][j+1]))
         print(x0_SIRDeltaD)
-        es = cma.fmin(NBlike_SIR, x0_SIRDeltaD, sigma0=1, args=(p, parameters_to_optimise_SIRDeltaD, data_D, travel_data), options = optsSIRDeltaD)
+        es = cma.fmin(NBneglogL_models, x0_SIRDeltaD, sigma0=1, args=(p, parameters_to_optimise_SIRDeltaD, data_D, travel_data, get_model_SIR_solution), options = optsSIRDeltaD)
         parametersSIRDeltaD.append(es[0])
         scoresSIRDeltaD.append(es[1])
         stddevSIRDeltaD.append(es[6])
@@ -324,16 +377,7 @@ def run_optimise():
     # Extract best
     obtained_parameters_SIRDeltaD = parametersSIRDeltaD[0]
     obtained_stdev_SIRDeltaD = stddevSIRDeltaD[0]
-    # Store SIR resutls
-    print('Storing default fit SIR-DeltaD model best result...')
-    with open(filename_SIRDeltaD + '.txt', 'w') as f:
-        for x in obtained_parameters_SIRDeltaD:
-            f.write(pints.strfloat(x) + '\n')
-
-    print('Storing default fit all_SIR SIR model errors...')
-    with open(filename_SIRDeltaD + '-errors.txt', 'w') as f:
-        for score in scoresSIRDeltaD:
-            f.write(pints.strfloat(-score) + '\n')
+    
 
     # Store simulations for plotting
     p_dict_SIRDeltaD = dict(zip(parameters_to_optimise_SIRDeltaD, obtained_parameters_SIRDeltaD))
@@ -371,11 +415,14 @@ def run_optimise():
         optsSINR = cma.CMAOptions()
         optsSINR.set("bounds", bounds_SINR)
         optsSINR.set("CMA_stds", stds_SINR)
+        #if debuging_flag:
+            #optsSINR.set("maxfevals",10)
+            #optsSINR.set("seed", 100)
         x0_SINR = np.random.uniform(bounds_SINR[0][0], bounds_SINR[1][0])
         for j in range(len(bounds_SINR[0])-1):
             x0_SINR = np.append(x0_SINR, np.random.uniform(bounds_SINR[0][j+1], bounds_SINR[1][j+1]))
         print(x0_SINR)
-        es = cma.fmin(NBlike_SINR, x0_SINR, sigma0=1, args=(p, parameters_to_optimise_SINR, data_D, travel_data), options=optsSINR)
+        es = cma.fmin(NBneglogL_models, x0_SINR, sigma0=1, args=(p, parameters_to_optimise_SINR, data_D, travel_data, get_model_SIUR_solution), options=optsSINR)
         parametersSINR.append(es[0])
         scoresSINR.append(es[1])
         stddevSINR.append(es[6])
@@ -390,16 +437,7 @@ def run_optimise():
     # Extract best
     obtained_parameters_SINR = parametersSINR[0]
     obtained_stdev_SINR = stddevSINR[0]
-    # Store SIR resutls
-    print('Storing default fit SINR model best result...')
-    with open(filename_SINR + '.txt', 'w') as f:
-        for x in obtained_parameters_SINR:
-            f.write(pints.strfloat(x) + '\n')
-
-    print('Storing default fit SINR model errors...')
-    with open(filename_SINR + '-errors.txt', 'w') as f:
-        for score in scoresSINR:
-            f.write(pints.strfloat(-score) + '\n')
+    
 
     # Simulations for plots:
     p_dict_SINR = dict(zip(parameters_to_optimise_SINR, obtained_parameters_SINR))
@@ -423,7 +461,7 @@ def run_optimise():
         print('Fitting SItR model')
         parameters_to_optimise = ['rho', 'Iinit1', 'negative_binomial_phi']
         toy_values = [3, 1000, .001]
-        filename_AGE = os.path.join(folder_path, get_file_name_suffix(p, 'syntheticSItRD-'+str(SyntDataNum_file), Noise_flag+'-maxtime-' + str(maxtime_fit), parameters_to_optimise))
+        #filename_AGE = os.path.join(folder_path, get_file_name_suffix(p, 'syntheticSItRD-'+str(SyntDataNum_file), Noise_flag+'-maxtime-' + str(maxtime_fit), parameters_to_optimise))
         
         bounds_SItR = [[ rho_lower, Iinit1_lower, negative_binomial_phi_lower], [ rho_upper, Iinit1_upper, negative_binomial_phi_upper]]
         stds_SItR = [1e-1, 100, 1e-2]
@@ -438,7 +476,7 @@ def run_optimise():
         print('Age model fitting using RMSE.')
         # Set up optimisation
         print('Selected data source: ' + 'simulatedAGE')
-        print('Storing results to: ' + filename_AGE + '.txt')
+        #print('Storing results to: ' + filename_AGE + '.txt')
         
         # Calculate beta, gamma and zeta vector rates.
         print('Storing fixed parameters...')
@@ -453,14 +491,16 @@ def run_optimise():
             print('Age model fitting using RMSE. Repeat: ' + str(i + 1))
             # CMA-ES (covariance matrix adaptation evolution strategy)
             opts = cma.CMAOptions()
-            #opts.set("seed", 100)
             opts.set("bounds", bounds_SItR)
             opts.set("CMA_stds", stds_SItR)
+            #if debuging_flag:
+                #opts.set("maxfevals",10)
+                #opts.set("seed", 100)
             x0 = np.random.uniform(bounds_SItR[0][0], bounds_SItR[1][0])
             for j in range(len(bounds_SItR[0])-1):
                 x0 = np.append(x0, np.random.uniform(bounds_SItR[0][j+1], bounds_SItR[1][j+1]))
             print(x0)
-            es = cma.fmin(NBlike_SItRD, x0, sigma0=1, args=(p, parameters_to_optimise, travel_data, data_D), options=opts)
+            es = cma.fmin(NBneglogL_models, x0, sigma0=1, args=(p, parameters_to_optimise, data_D, travel_data,  get_model_solution), options=opts)
             parameters.append(es[0])
             scores.append(es[1])
 
@@ -478,16 +518,6 @@ def run_optimise():
         # Extract best
         obtained_parameters = parameters[0]
 
-        # Store results
-        print('Storing age modelbest result...')
-        with open(filename_AGE + travel_label + str(travel_data) + '.txt', 'w') as f:
-            for x in obtained_parameters:
-                f.write(pints.strfloat(x) + '\n')
-
-        print('Storing all age model errors...')
-        with open(filename_AGE + travel_label + str(travel_data) + '-errors.txt', 'w') as f:
-            for score in scores:
-                f.write(pints.strfloat(-score) + '\n')
         
         # store simulations for plotting
         p_dict_SItRD = dict(zip(parameters_to_optimise, obtained_parameters))
@@ -624,9 +654,9 @@ def run_optimise():
     ax4.grid(True)
     plt.tight_layout()
     # save plot
-    plt.savefig(filename_plot + '.png')
+    #plt.savefig(filename_plot + '.png')
 
-    #plt.show()
+    plt.show()
     
     
     

@@ -307,7 +307,7 @@ def get_model_SIR_solution(p, parameters_dictionary, travel_data = True):
     '''Returns model solution for given parameters, including DeltaD for basic SIRD model without infection age distribution'''
 
     _, _, _, _, D = solve_SIR_difference_equations(p, parameters_dictionary=parameters_dictionary, travel_data=travel_data)
-    DeltaD = p_dict.get('DeltaD', p.DeltaD)
+    DeltaD = parameters_dictionary.get('DeltaD', p.DeltaD)
     return D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate + int(DeltaD))]
 
 def get_model_SIUR_solution(p, parameters_dictionary, travel_data = True):
