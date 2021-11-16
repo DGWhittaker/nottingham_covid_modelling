@@ -12,7 +12,7 @@ from nottingham_covid_modelling import MODULE_DIR
 # Load project modules
 from nottingham_covid_modelling.lib._command_line_args import NOISE_MODEL_MAPPING, POPULATION
 from nottingham_covid_modelling.lib.data import DataLoader
-from nottingham_covid_modelling.lib.equations import solve_difference_equations, solve_SIR_difference_equations, store_rate_vectors, solve_SINR_difference_equations, step
+from nottingham_covid_modelling.lib.equations import solve_difference_equations, solve_SIR_difference_equations, store_rate_vectors, solve_SIUR_difference_equations, step
 from nottingham_covid_modelling.lib.settings import Params, get_file_name_suffix
 from nottingham_covid_modelling.lib.error_measures import calculate_RMSE
 from nottingham_covid_modelling.lib.ratefunctions import calculate_R_instantaneous
@@ -122,7 +122,7 @@ def run_optimise():
         return -f
     def NBlike_SINR(params, p, parameters_dictionary, data_D, travel_data):
         p_dict = dict(zip(parameters_dictionary, params))
-        _, _, _, _, _, D = solve_SINR_difference_equations(p, parameters_dictionary = p_dict, travel_data = travel_data)
+        _, _, _, _, _, D = solve_SIUR_difference_equations(p, parameters_dictionary = p_dict, travel_data = travel_data)
         D = D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate)]
         f = 0
         NB_n = 1 / p_dict['negative_binomial_phi']
@@ -340,7 +340,7 @@ def run_optimise():
 
     # Simulations for plots:
     p_dict_SINR = dict(zip(parameters_to_optimise_SINR, obtained_parameters_SINR))
-    S_u, I_u, Inew_u, N_u, R_u, D_u = solve_SINR_difference_equations(p, p_dict_SINR, travel_data)
+    S_u, I_u, Inew_u, N_u, R_u, D_u = solve_SIUR_difference_equations(p, p_dict_SINR, travel_data)
     
     if p.square_lockdown:
         alpha_SINR = step(p, lgoog_data = p.maxtime-(p.numeric_max_age + p.extra_days_to_simulate)+1, parameters_dictionary = p_dict_SINR)

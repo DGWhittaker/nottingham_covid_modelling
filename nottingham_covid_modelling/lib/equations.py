@@ -251,7 +251,7 @@ def solve_SIR_difference_equations(p, parameters_dictionary, travel_data):
     return S, I, Inew, R, D
 
 
-def solve_SINR_difference_equations(p, parameters_dictionary, travel_data):
+def solve_SIUR_difference_equations(p, parameters_dictionary, travel_data):
 
     '''Solves difference equations for SINRD model without infection age distribution'''
 
@@ -302,9 +302,17 @@ def solve_SINR_difference_equations(p, parameters_dictionary, travel_data):
     return S, I,Inew, N, R, D
 
 
-def get_model_SIR_solution(p, parameters_dictionary, travel_data):
+def get_model_SIR_solution(p, parameters_dictionary, travel_data = True):
 
-    '''Returns model solution for given parameter sfor basic SIRD model without infection age distribution'''
+    '''Returns model solution for given parameters, including DeltaD for basic SIRD model without infection age distribution'''
 
     _, _, _, _, D = solve_SIR_difference_equations(p, parameters_dictionary=parameters_dictionary, travel_data=travel_data)
+    DeltaD = p_dict.get('DeltaD', p.DeltaD)
+    return D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate + int(DeltaD))]
+
+def get_model_SIUR_solution(p, parameters_dictionary, travel_data = True):
+
+    '''Returns model solution for SIUR model for given parameters'''
+
+    _, _, _, _, _, D = solve_SIUR_difference_equations(p, parameters_dictionary=parameters_dictionary, travel_data = travel_data)
     return D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate)]
