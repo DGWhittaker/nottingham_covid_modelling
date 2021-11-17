@@ -22,13 +22,14 @@ FITING_MAPPING = {'default': ['rho', 'Iinit1', 'negative_binomial_phi'], 'full':
 def run_optimise():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--repeats", type=int, help="number of CMA-ES repeats", default=5)
-    parser.add_argument("-age", "--age_fit", action='store_true', help="Wheter to fit the Age model or not", default=False)
-    parser.add_argument("-travel", "--travel_data", action='store_true', help="Wheter to use travel data or not", default=False)
-    parser.add_argument("-step", "--square_lockdown", action='store_true', help='Wheter to use square_lockdown approximation or not. It will be ignored it travel data is FALSE', default=False)
-    parser.add_argument("-params", "--fit_params", type=str, help="Wheter to fit rho and I0, or theta/xi as well", choices=FITING_MAPPING.keys(), default='default')
-    parser.add_argument("-fitstep", "--fit_step", action='store_true', help='Wheter to fit step parameters. It will be ignored if travel FALSE and step FALSE', default=False)
+    parser.add_argument("-age", "--age_fit", action='store_true', help="Whether to fit the Age model or not", default=False)
+    parser.add_argument("-travel", "--travel_data", action='store_true', help="Whether to use travel data or not", default=False)
+    parser.add_argument("-step", "--square_lockdown", action='store_true', help='Whether to use square_lockdown approximation or not. It will be ignored it travel data is FALSE', default=False)
+    parser.add_argument("-params", "--fit_params", type=str, help="Whether to fit rho and I0, or theta/xi as well", choices=FITING_MAPPING.keys(), default='default')
+    parser.add_argument("-full", "--fit_full", action='store_true', help='Whether to fit only rho and I0, or all the model parameters', default=False)
+    parser.add_argument("-fitstep", "--fit_step", action='store_true', help='Whether to fit step parameters. It will be ignored if travel FALSE and step FALSE', default=False)
     #parser.add_argument("--outputfolder", type=str, help="Folder to upload/store", default='out_SIRvsAGEfits')
-    parser.add_argument("--syndata_num", type=int, help="Number of syntetic data to be fitted", default=1)
+    parser.add_argument("--syndata_num", type=int, help="Number of syntetic data set to be fitted", default=1)
 
     # At the moment, syntethic data sets 2-9 have travel and step options only. There is only one data sets without step and one with neither travel nor step.
 
@@ -38,15 +39,20 @@ def run_optimise():
     FitAge = args.age_fit
     travel_data = args.travel_data
     Fitparams = args.fit_params
+    FitFull = args.fit_full
     FitStep = args.fit_step
     SyntDataNum_file = args.syndata_num
+    SquareLockdown = args.square_lockdown
     
     if debuging_flag:
         FitAge = True
-        repeats = 5
+        repeats = 1
         Fitparams = 'full'
+        FitFull = True
         FitStep = True
-        #np.random.seed(100)
+        SquareLockdown = True
+        travel_data =True
+        np.random.seed(100)
 
     # folder to load/ save data
     if SyntDataNum_file == 1: #Original default syntethic data
@@ -56,21 +62,6 @@ def run_optimise():
         folder_path =  os.path.join(MODULE_DIR, 'out_SIRvsAGE_SuplementaryFig')
         full_fit_data_file = 'SynteticSItD_default_params_travel_TRUE_step_TRUE_' + str(SyntDataNum_file) + '.npy'
     
-    
-    if Fitparams == 'full':
-        parameters_to_optimise_SINR = FITING_MAPPING[Fitparams]
-        parameters_to_optimise_SIR = ['rho', 'Iinit1', 'theta', 'negative_binomial_phi']
-        parameters_to_optimise_SIRDeltaD = ['rho', 'Iinit1', 'theta', 'DeltaD', 'negative_binomial_phi']
-    else:
-        parameters_to_optimise_SIR = ['rho', 'Iinit1','negative_binomial_phi']
-        parameters_to_optimise_SINR = FITING_MAPPING[Fitparams]
-        parameters_to_optimise_SIRDeltaD = ['rho', 'Iinit1','negative_binomial_phi']
-
-    if FitStep:
-        parameters_to_optimise_SIR.extend(['lockdown_baseline', 'lockdown_offset'])
-        parameters_to_optimise_SIRDeltaD.extend(['lockdown_baseline', 'lockdown_offset'])
-        parameters_to_optimise_SINR.extend(['lockdown_baseline', 'lockdown_offset'])
-    
 
     # Label for plots
     Model2_label = r'SI_tD'
@@ -78,7 +69,7 @@ def run_optimise():
     maxtime_fit = 150
     neg_bin_fix_mu = 1e-12
     
-    Noise_flag = 'NBphi_2e-3_'
+    #Noise_flag = 'NBphi_2e-3_' # For file names
     
     # Get parameters, p
     p = Params()
@@ -87,23 +78,25 @@ def run_optimise():
     p.extra_days_to_simulate = 10
     p.IFR = 0.00724 # UK time
     #maxtime = 310 - p.numeric_max_age - p.extra_days_to_simulate
-    
+
+
     if travel_data:
-        p.square_lockdown = args.square_lockdown
+        p.square_lockdown = SquareLockdown
         # parameters based on UK google and ONS data
         p.alpha = np.ones(p.maxtime)
         p.lockdown_baseline = 0.2814 #0.2042884852266899
         p.lockdown_offset = 31.57 #34.450147247864166
         if p.square_lockdown:
             data_filename = full_fit_data_file
-            travel_label = '_travel_TRUE_step_TRUE_rho_0-2'
+            travel_label = '_travel_TRUE_step_TRUE_rho_0-2'  # For file names
         else:
             data_filename = 'forward_model_default_params_travel_TRUE.npy'
-            travel_label = '_travel_TRUE_step_FALSE'
+            travel_label = '_travel_TRUE_step_FALSE'  # For file names
     else:
         p.square_lockdown = False
         data_filename = 'SItRDmodel_ONSparams_noise_NB_NO-R_travel_FALSE.npy'
-        travel_label = '_travel_FALSE'
+        travel_label = '_travel_FALSE'  # For file names
+
 
     
 
@@ -139,87 +132,54 @@ def run_optimise():
     # Fix random seed for reproducibility
     # np.random.seed(100) # not sure if it's working
     
+
     
-    # NB likelihoods:
-    def NBlike_SItRD_old(params, p, parameters_dictionary, data_D, travel_data):
-        p_dict = dict(zip(parameters_dictionary, params))
-        _, _, _, D, _ = solve_difference_equations(p, parameters_dictionary = p_dict, travel_data = travel_data)
-        D = D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate)]
-        f = 0
-        NB_n = 1 / p_dict['negative_binomial_phi']
-        for i in range(len(D)):
-            mu = D[i]
-            if mu < neg_bin_fix_mu and data_D[i+p.day_1st_death_after_150220] > 0:
-                mu = neg_bin_fix_mu
-            NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
-            f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220], NB_n, NB_p)
-        return -f
-    def NBlike_SIR_old(params, p, parameters_dictionary, data_D, travel_data):
-        p_dict = dict(zip(parameters_dictionary, params))
-        _, _, _, _, D = solve_SIR_difference_equations(p, parameters_dictionary = p_dict, travel_data = travel_data)
-        DeltaD = p_dict.get('DeltaD', p.DeltaD)
-        D = D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate + int(DeltaD))]
-        f = 0
-        NB_n = 1 / p_dict['negative_binomial_phi']
-        for i in range(len(D)):
-            mu = D[i]
-            if mu < neg_bin_fix_mu and data_D[i+p.day_1st_death_after_150220] > 0:
-                mu = neg_bin_fix_mu
-            NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
-            f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220], NB_n, NB_p)
-        return -f
-    def NBlike_SIUR_old(params, p, parameters_dictionary, data_D, travel_data):
-        p_dict = dict(zip(parameters_dictionary, params))
-        _, _, _, _, _, D = solve_SIUR_difference_equations(p, parameters_dictionary = p_dict, travel_data = travel_data)
-        D = D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate)]
-        f = 0
-        NB_n = 1 / p_dict['negative_binomial_phi']
-        for i in range(len(D)):
-            mu = D[i]
-            if mu < neg_bin_fix_mu and data_D[i+p.day_1st_death_after_150220] > 0:
-                mu = neg_bin_fix_mu
-            NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
-            f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220],NB_n, NB_p)
-        return -f
+    # Functions
+    def parameter_to_optimize_list(FitFull, FitStep, model_name):
+        # Valid model_names: 'SIR', 'SIRDeltaD', 'SItD', 'SIUR' 
+        assert model_name in ['SIR', 'SIRDeltaD', 'SItD', 'SIUR'], "Unknown model"
+        parameters_to_optimise = ['rho', 'Iinit1']
+        if FitFull:
+            if model_name != 'SItD':
+                parameters_to_optimise.extend(['theta'])
+            if model_name == 'SIUR':
+                parameters_to_optimise.extend(['xi'])
+            if model_name == 'SIRDeltaD':
+                parameters_to_optimise.extend(['DeltaD'])
+        parameters_to_optimise.extend(['negative_binomial_phi'])
+        if FitStep:
+            parameters_to_optimise.extend(['lockdown_baseline', 'lockdown_offset'])
+        return parameters_to_optimise
+
+    
+    
+    parameters_to_optimise_SIR = parameter_to_optimize_list(FitFull, FitStep, 'SIR')
+    parameters_to_optimise_SIRDeltaD = parameter_to_optimize_list(FitFull, FitStep, 'SIRDeltaD')
+    parameters_to_optimise_SINR = parameter_to_optimize_list(FitFull, FitStep, 'SIUR')
+    
 
 
-    def NBlike_SItRD(params, p, parameters_dictionary, data_D, travel_data):
-        p_dict = dict(zip(parameters_dictionary, params))
-        D = get_model_solution(p, parameters_dictionary = p_dict, travel_data = travel_data)
-        f = 0
-        NB_n = 1 / p_dict['negative_binomial_phi']
-        for i in range(len(D)):
-            mu = D[i]
-            if mu < neg_bin_fix_mu and data_D[i+p.day_1st_death_after_150220] > 0:
-                mu = neg_bin_fix_mu
-            NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
-            f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220], NB_n, NB_p)
-        return -f
-    def NBlike_SIR(params, p, parameters_dictionary, data_D, travel_data):
-        p_dict = dict(zip(parameters_dictionary, params))
-        D = get_model_SIR_solution(p, parameters_dictionary = p_dict, travel_data = travel_data)
-        f = 0
-        NB_n = 1 / p_dict['negative_binomial_phi']
-        for i in range(len(D)):
-            mu = D[i]
-            if mu < neg_bin_fix_mu and data_D[i+p.day_1st_death_after_150220] > 0:
-                mu = neg_bin_fix_mu
-            NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
-            f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220], NB_n, NB_p)
-        return -f
-    def NBlike_SIUR(params, p, parameters_dictionary, data_D, travel_data):
-        p_dict = dict(zip(parameters_dictionary, params))
-        D = get_model_SIUR_solution(p, parameters_dictionary = p_dict, travel_data = travel_data)
-        f = 0
-        NB_n = 1 / p_dict['negative_binomial_phi']
-        for i in range(len(D)):
-            mu = D[i]
-            if mu < neg_bin_fix_mu and data_D[i+p.day_1st_death_after_150220] > 0:
-                mu = neg_bin_fix_mu
-            NB_p = 1 / (1 + mu * p_dict['negative_binomial_phi'])
-            f += nbinom.logpmf(data_D[i+p.day_1st_death_after_150220],NB_n, NB_p)
-        return -f
 
+    def par_bounds(parameters_to_optimize):
+        lower = []
+        upper = []
+        stds = []
+        rho_lower, rho_upper, rho_std = 0, 5, 1e-2
+        # rho_SIR_lower, rho_SIR_upper = 0, 2
+        # rho_lower, rho_upper = 1, 5
+        Iinit1_lower, Iinit1_upper, Iinit1_std  = 1, 5e4, 100
+        theta_lower, theta_upper, theta_std = 0, 1, 1e-2
+        DeltaD_lower, DeltaD_upper, DeltaD_std = 0, 50, 10
+        xi_lower, xi_upper, xi_std = 0, 1, 1e-2
+        negative_binomial_phi_lower, negative_binomial_phi_upper, negative_binomial_phi_std = 0, 1, 1e-2
+        lockdown_baseline_lower, lockdown_baseline_upper, lockdown_baseline_std = 0, 1, 1e-2
+        lockdown_offset_lower, lockdown_offset_upper, lockdown_offset_std = 0, 100, 10
+        for parameter_name in parameters_to_optimize:
+            lower = np.append(lower, eval(parameter_name + '_lower'))
+            upper = np.append(upper,eval(parameter_name + '_upper'))
+            stds = np.append(stds, eval(parameter_name + '_std'))
+        bounds = np.stack((lower, upper)).tolist()
+        return bounds, stds
 
     def NBneglogL_models(params, p, parameters_dictionary, data_D, travel_data, model_func):
         p_dict = dict(zip(parameters_dictionary, params))
@@ -241,50 +201,13 @@ def run_optimise():
     DeltaD_SIR = int(p.death_mean - p.beta_mean)
     xi_SINR = 1 / (p.death_mean -p.beta_mean)
     
-    # Define priors for SIR and SINR
-    rho_lower = 1
-    rho_upper =  5
-    rho_SIR_lower = 0
-    rho_SIR_upper = 2 # 1
-    Iinit1_lower = 1
-    Iinit1_upper = 5e4
-    theta_lower = 0
-    theta_upper = 1
-    DeltaD_lower = 0
-    DeltaD_upper = 50
-    xi_lower = 0
-    xi_upper = 1
-    negative_binomial_phi_lower, negative_binomial_phi_upper = 0, 1
-    lockdown_baseline_lower, lockdown_baseline_upper = 0, 1
-    lockdown_offset_lower, lockdown_offset_upper = 0, 100
     
     # define bounds and stds:
-    if Fitparams == 'full':
-        bounds_SIR = [[rho_SIR_lower, Iinit1_lower, theta_lower, negative_binomial_phi_lower], [ rho_SIR_upper, Iinit1_upper, theta_upper, negative_binomial_phi_upper]]
-        bounds_SIRDeltaD = [[rho_SIR_lower, Iinit1_lower, theta_lower, DeltaD_lower, negative_binomial_phi_lower], [ rho_SIR_upper, Iinit1_upper, theta_upper, DeltaD_upper, negative_binomial_phi_upper]]
-        bounds_SINR = [[rho_SIR_lower, Iinit1_lower, theta_lower, xi_lower, negative_binomial_phi_lower], [ rho_SIR_upper, Iinit1_upper, theta_upper, xi_upper, negative_binomial_phi_upper]]
-        stds_SIR = [1e-2, 100, 1e-2, 1e-2]
-        stds_SIRDeltaD = [1e-2, 100, 1e-2, 10, 1e-2]
-        stds_SINR = [1e-2, 100, 1e-2, 1e-2,1e-2]
-    else:
-        bounds_SIR = [[ rho_SIR_lower, Iinit1_lower, negative_binomial_phi_lower], [ rho_SIR_upper, Iinit1_upper, negative_binomial_phi_upper]]
-        bounds_SIRDeltaD = [[ rho_SIR_lower, Iinit1_lower, negative_binomial_phi_lower], [ rho_SIR_upper, Iinit1_upper, negative_binomial_phi_upper]]
-        bounds_SINR = [[ rho_SIR_lower, Iinit1_lower,negative_binomial_phi_lower], [ rho_SIR_upper, Iinit1_upper, negative_binomial_phi_upper]]
-        stds_SIR = [1e-2, 100,1e-2]
-        stds_SIRDeltaD = [1e-2, 100,1e-2]
-        stds_SINR = [1e-2, 100,1e-2]
-
-    if FitStep:
-        bounds_SIR[0].extend([lockdown_baseline_lower, lockdown_offset_lower])
-        bounds_SIR[1].extend([lockdown_baseline_upper, lockdown_offset_upper])
-        bounds_SIRDeltaD[0].extend([lockdown_baseline_lower, lockdown_offset_lower])
-        bounds_SIRDeltaD[1].extend([lockdown_baseline_upper, lockdown_offset_upper])
-        bounds_SINR[0].extend([lockdown_baseline_lower, lockdown_offset_lower])
-        bounds_SINR[1].extend([lockdown_baseline_upper, lockdown_offset_upper])
-        stds_SIR.extend([1e-2, 10])
-        stds_SIRDeltaD.extend([1e-2, 10])
-        stds_SINR.extend([1e-2, 10])
+    bounds_SIR, stds_SIR = par_bounds(parameters_to_optimise_SIR) 
+    bounds_SIRDeltaD, stds_SIRDeltaD = par_bounds(parameters_to_optimise_SIRDeltaD)
+    bounds_SINR, stds_SINR= par_bounds(parameters_to_optimise_SINR)
     
+
     ## Optimization for the SIR model
     print('SIR model fitting.')
     # Optimize only rho and Iinit:
@@ -299,9 +222,9 @@ def run_optimise():
         optsSIR = cma.CMAOptions()
         optsSIR.set("bounds", bounds_SIR)
         optsSIR.set("CMA_stds", stds_SIR)
-        #if debuging_flag:
-            #optsSIR.set("maxfevals",10)
-            #optsSIR.set("seed", 100)
+        if debuging_flag:
+            optsSIR.set("maxfevals",10)
+            optsSIR.set("seed", 100)
         x0_SIR = np.random.uniform(bounds_SIR[0][0], bounds_SIR[1][0])
         for j in range(len(bounds_SIR[0])-1):
             x0_SIR = np.append(x0_SIR, np.random.uniform(bounds_SIR[0][j+1], bounds_SIR[1][j+1]))
@@ -355,9 +278,9 @@ def run_optimise():
         optsSIRDeltaD = cma.CMAOptions()
         optsSIRDeltaD.set("bounds", bounds_SIRDeltaD)
         optsSIRDeltaD.set("CMA_stds", stds_SIRDeltaD)
-        #if debuging_flag:
-            #optsSIRDeltaD.set("maxfevals",10)
-            #optsSIRDeltaD.set("seed", 100)
+        if debuging_flag:
+            optsSIRDeltaD.set("maxfevals",10)
+            optsSIRDeltaD.set("seed", 100)
         x0_SIRDeltaD = np.random.uniform(bounds_SIRDeltaD[0][0], bounds_SIRDeltaD[1][0])
         for j in range(len(bounds_SIRDeltaD[0])-1):
             x0_SIRDeltaD = np.append(x0_SIRDeltaD, np.random.uniform(bounds_SIRDeltaD[0][j+1], bounds_SIRDeltaD[1][j+1]))
@@ -415,9 +338,9 @@ def run_optimise():
         optsSINR = cma.CMAOptions()
         optsSINR.set("bounds", bounds_SINR)
         optsSINR.set("CMA_stds", stds_SINR)
-        #if debuging_flag:
-            #optsSINR.set("maxfevals",10)
-            #optsSINR.set("seed", 100)
+        if debuging_flag:
+            optsSINR.set("maxfevals",10)
+            optsSINR.set("seed", 100)
         x0_SINR = np.random.uniform(bounds_SINR[0][0], bounds_SINR[1][0])
         for j in range(len(bounds_SINR[0])-1):
             x0_SINR = np.append(x0_SINR, np.random.uniform(bounds_SINR[0][j+1], bounds_SINR[1][j+1]))
@@ -459,18 +382,17 @@ def run_optimise():
     # If Age fit required:
     if FitAge:
         print('Fitting SItR model')
-        parameters_to_optimise = ['rho', 'Iinit1', 'negative_binomial_phi']
+        parameters_to_optimise =  parameter_to_optimize_list(FitFull, FitStep, 'SItD')
         toy_values = [3, 1000, .001]
+        if FitStep:
+            toy_values.extend([p.lockdown_baseline, p.lockdown_offset])
+
         #filename_AGE = os.path.join(folder_path, get_file_name_suffix(p, 'syntheticSItRD-'+str(SyntDataNum_file), Noise_flag+'-maxtime-' + str(maxtime_fit), parameters_to_optimise))
         
-        bounds_SItR = [[ rho_lower, Iinit1_lower, negative_binomial_phi_lower], [ rho_upper, Iinit1_upper, negative_binomial_phi_upper]]
-        stds_SItR = [1e-1, 100, 1e-2]
-        if FitStep:
-            parameters_to_optimise.extend(['lockdown_baseline', 'lockdown_offset'])
-            bounds_SItR[0].extend([lockdown_baseline_lower, lockdown_offset_lower])
-            bounds_SItR[1].extend([lockdown_baseline_upper, lockdown_offset_upper])
-            toy_values.extend([p.lockdown_baseline, p.lockdown_offset])
-            stds_SItR.extend([1e-2, 10])
+        bounds_SItR, stds_SItR = par_bounds(parameters_to_optimise)
+        # MANUALLY correct that we set rho bigger than 1 for this case
+        bounds_SItR[0][0] = 1
+        
 
         
         print('Age model fitting using RMSE.')
@@ -493,9 +415,9 @@ def run_optimise():
             opts = cma.CMAOptions()
             opts.set("bounds", bounds_SItR)
             opts.set("CMA_stds", stds_SItR)
-            #if debuging_flag:
-                #opts.set("maxfevals",10)
-                #opts.set("seed", 100)
+            if debuging_flag:
+                opts.set("maxfevals",10)
+                opts.set("seed", 100)
             x0 = np.random.uniform(bounds_SItR[0][0], bounds_SItR[1][0])
             for j in range(len(bounds_SItR[0])-1):
                 x0 = np.append(x0, np.random.uniform(bounds_SItR[0][j+1], bounds_SItR[1][j+1]))
