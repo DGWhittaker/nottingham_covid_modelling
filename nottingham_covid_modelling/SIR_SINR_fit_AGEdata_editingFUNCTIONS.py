@@ -189,17 +189,17 @@ def run_optimise():
     # np.random.seed(100) # not sure if it's working
 
     
-    # Redefinition of parameters for SIR and SINR ( 1/mean)
+    # Redefinition of parameters for SIR and SIUR ( 1/mean)
     beta_SIR = 1
     theta_SIR = 1 / p.beta_mean
-    theta_SINR = 1 / p.beta_mean
+    theta_SIUR = 1 / p.beta_mean
     DeltaD_SIR = int(p.death_mean - p.beta_mean)
-    xi_SINR = 1 / (p.death_mean -p.beta_mean)
+    xi_SIUR = 1 / (p.death_mean -p.beta_mean)
     
     # define the params to optimize
     parameters_to_optimise_SIR = parameter_to_optimize_list(FitFull, FitStep, 'SIR')
     parameters_to_optimise_SIRDeltaD = parameter_to_optimize_list(FitFull, FitStep, 'SIRDeltaD')
-    parameters_to_optimise_SINR = parameter_to_optimize_list(FitFull, FitStep, 'SIUR')
+    parameters_to_optimise_SIUR = parameter_to_optimize_list(FitFull, FitStep, 'SIUR')
 
 
     print('SIR model fitting using pints')
@@ -262,7 +262,7 @@ def run_optimise():
     # define bounds and stds:
     bounds_SIR, stds_SIR = par_bounds(parameters_to_optimise_SIR) 
     bounds_SIRDeltaD, stds_SIRDeltaD = par_bounds(parameters_to_optimise_SIRDeltaD)
-    bounds_SINR, stds_SINR= par_bounds(parameters_to_optimise_SINR)
+    bounds_SIUR, stds_SIUR= par_bounds(parameters_to_optimise_SIUR)
     
 
     ## Optimization for the SIR model
@@ -380,60 +380,60 @@ def run_optimise():
    
 
     
-    ## Optimization for the SINR model
+    ## Optimization for the SIUR model
     print('SIUR model fitting.')
     # Optimize only rho and Iinit:
     print('------- SIUR: Fitting rho and Iinit -----------')
     # Define theta and xi
-    p.theta = theta_SINR
-    p.xi = xi_SINR
+    p.theta = theta_SIUR
+    p.xi = xi_SIUR
 
     
-    parametersSINR, scoresSINR, stddevSINR = [], [], []
+    parametersSIUR, scoresSIUR, stddevSIUR = [], [], []
     for i in range(repeats):
         print('SIUR' +  Fitparams +  ' fitting Repeat: ' + str(i + 1))
-        optsSINR = cma.CMAOptions()
-        optsSINR.set("bounds", bounds_SINR)
-        optsSINR.set("CMA_stds", stds_SINR)
+        optsSIUR = cma.CMAOptions()
+        optsSIUR.set("bounds", bounds_SIUR)
+        optsSIUR.set("CMA_stds", stds_SIUR)
         if debuging_flag:
-            optsSINR.set("maxfevals",10)
-            optsSINR.set("seed", 100)
-        x0_SINR = np.random.uniform(bounds_SINR[0][0], bounds_SINR[1][0])
-        for j in range(len(bounds_SINR[0])-1):
-            x0_SINR = np.append(x0_SINR, np.random.uniform(bounds_SINR[0][j+1], bounds_SINR[1][j+1]))
-        print(x0_SINR)
-        es = cma.fmin(NBneglogL_models, x0_SINR, sigma0=1, args=(p, parameters_to_optimise_SINR, data_D, travel_data, get_model_SIUR_solution), options=optsSINR)
-        parametersSINR.append(es[0])
-        scoresSINR.append(es[1])
-        stddevSINR.append(es[6])
+            optsSIUR.set("maxfevals",10)
+            optsSIUR.set("seed", 100)
+        x0_SIUR = np.random.uniform(bounds_SIUR[0][0], bounds_SIUR[1][0])
+        for j in range(len(bounds_SIUR[0])-1):
+            x0_SIUR = np.append(x0_SIUR, np.random.uniform(bounds_SIUR[0][j+1], bounds_SIUR[1][j+1]))
+        print(x0_SIUR)
+        es = cma.fmin(NBneglogL_models, x0_SIUR, sigma0=1, args=(p, parameters_to_optimise_SIUR, data_D, travel_data, get_model_SIUR_solution), options=optsSIUR)
+        parametersSIUR.append(es[0])
+        scoresSIUR.append(es[1])
+        stddevSIUR.append(es[6])
 
     # Sort according to smallest function score
     #SIR
-    orderSINR = np.argsort(scoresSINR)
-    scoresSINR = np.asarray(scoresSINR)[orderSINR]
-    parametersSINR = np.asarray(parametersSINR)[orderSINR]
-    stddevSINR = np.asarray(stddevSINR)[orderSINR]
+    orderSIUR = np.argsort(scoresSIUR)
+    scoresSIUR = np.asarray(scoresSIUR)[orderSIUR]
+    parametersSIUR = np.asarray(parametersSIUR)[orderSIUR]
+    stddevSIUR = np.asarray(stddevSIUR)[orderSIUR]
 
     # Extract best
-    obtained_parameters_SINR = parametersSINR[0]
-    obtained_stdev_SINR = stddevSINR[0]
+    obtained_parameters_SIUR = parametersSIUR[0]
+    obtained_stdev_SIUR = stddevSIUR[0]
     
 
     # Simulations for plots:
-    p_dict_SINR = dict(zip(parameters_to_optimise_SINR, obtained_parameters_SINR))
-    label_SINR = ''
-    for l in p_dict_SINR:
-        label_SINR = label_SINR + str(l) + ': ' + str('%.4g' % p_dict_SINR.get(l)) + '\n'
-    S_u, I_u, Inew_u, N_u, R_u, D_u = solve_SIUR_difference_equations(p, p_dict_SINR, travel_data)
+    p_dict_SIUR = dict(zip(parameters_to_optimise_SIUR, obtained_parameters_SIUR))
+    label_SIUR = ''
+    for l in p_dict_SIUR:
+        label_SIUR = label_SIUR + str(l) + ': ' + str('%.4g' % p_dict_SIUR.get(l)) + '\n'
+    S_u, I_u, Inew_u, N_u, R_u, D_u = solve_SIUR_difference_equations(p, p_dict_SIUR, travel_data)
     if p.square_lockdown:
-        alpha_SINR = step(p, lgoog_data = p.maxtime + 1  - p.numeric_max_age, parameters_dictionary = p_dict_SINR)
+        alpha_SIUR = step(p, lgoog_data = p.maxtime + 1  - p.numeric_max_age, parameters_dictionary = p_dict_SIUR)
     else:
-        alpha_SINR = np.ones(p.maxtime + 1 + p.extra_days_to_simulate)
-    rho_SINR = p_dict_SINR.get('rho', p.rho)
-    Iinit_SINR = p_dict_SINR.get('Iinit1', p.Iinit1)
-    theta_fit_SINR = p_dict_SINR.get('theta',theta_SINR)
-    R_0_u = (rho_SINR * p.beta * 1) / theta_fit_SINR
-    R_eff_u = ((rho_SINR * p.beta * alpha_SINR[:-p.extra_days_to_simulate]) / theta_fit_SINR) * (S_u / p.N)
+        alpha_SIUR = np.ones(p.maxtime + 1 + p.extra_days_to_simulate)
+    rho_SIUR = p_dict_SIUR.get('rho', p.rho)
+    Iinit_SIUR = p_dict_SIUR.get('Iinit1', p.Iinit1)
+    theta_fit_SIUR = p_dict_SIUR.get('theta',theta_SIUR)
+    R_0_u = (rho_SIUR * p.beta * 1) / theta_fit_SIUR
+    R_eff_u = ((rho_SIUR * p.beta * alpha_SIUR[:-p.extra_days_to_simulate]) / theta_fit_SIUR) * (S_u / p.N)
 
     
     # If Age fit required:
@@ -534,63 +534,52 @@ def run_optimise():
         
     
     
-    ## PLOTS for SIR and SINR
+    ## PLOTS for SIR and SIUR
 
     
 
     print('---- Summary ...')
     # get the correct theta:
 
-    print('Data day of max new infections:')
-    print(np.argmax(data_I[0,:]))
-
+    print('Old method fits:')
     print('------ Best SIR parameters:------ ')
     print(parametersSIR[0])
-    print('Std Dev:')
-    print(stddevSIR[0])
     print('Best SIR score:')
     print(-scoresSIR[0])
-    print('Total deaths and recoveries:')
-    print([np.sum(D_s),np.sum(R_s)])
-    print('R_0, R_eff_min, R_eff_max, t where R_eff_a<1, t of Inew max ')
-    print([round(R_0_s,2),round(min(R_eff_s),2),round(max(R_eff_s),2), np.where(R_eff_s<1)[0][0], np.argmax(Inew_s[: -(p.numeric_max_age + p.extra_days_to_simulate)])])
-    
     print('------ Best SIR-DeltaD parameters:------ ')
     print(parametersSIRDeltaD[0])
-    print('Std Dev:')
-    print(stddevSIRDeltaD[0])
     print('Best SIR score:')
     print(-scoresSIRDeltaD[0])
-    print('Total deaths and recoveries:')
-    print([np.sum(D_sD),np.sum(R_sD)])
-    print('R_0, R_eff_min, R_eff_max, t where R_eff_a<1, t of Inew max ')
-    print([round(R_0_sD,2),round(min(R_eff_sD),2),round(max(R_eff_sD),2), np.where(R_eff_sD<1)[0][0], np.argmax(Inew_sD[: -(p.numeric_max_age + p.extra_days_to_simulate)])])
-
-
-
-    print('------ Best SINR parameters:------ ')
-    print(parametersSINR[0])
-    print('Std Dev:')
-    print(stddevSINR[0])
-    print('Best SINR score:')
-    print(-scoresSINR[0])
-    print('Day of max new infections:')
-    print(np.argmax(Inew_u[: -(p.numeric_max_age + p.extra_days_to_simulate)]))
-    print('Total deaths and recoveries with 2-DF:')
-    print([np.sum(D_u),np.sum(R_u)])
-    print('R_0, R_eff_min, R_eff_max, t where R_eff_a<1, t of Inew max ')
-    print([round(R_0_u,2),round(min(R_eff_u),2),round(max(R_eff_u),2), np.where(R_eff_u<1)[0][0], np.argmax(Inew_u[: -(p.numeric_max_age + p.extra_days_to_simulate)])])
-
+    print('------ Best SIUR parameters:------ ')
+    print(parametersSIUR[0])
+    print('Best SIUR score:')
+    print(-scoresSIUR[0])
     if FitAge:
         print('------ Best SItRD parameters:------ ')
         print(parameters[0])
-        print('Std Dev:')
+        print('Best SItD score:')
         print(-scores[0])
-        print('Total deaths and recoveries with 2-DF:')
-        print([np.sum(D_a),R_a[-1]])
-        print('R_0, R_eff_min, R_eff_max, t where R_eff_a<1, t of Inew max ')
-        print([round(R_0_a,2),round(min(R_eff_a),2),round(max(R_eff_a),2), np.where(R_eff_a<1)[0][0], np.argmax(Iday_a[0,: -(p.numeric_max_age + p.extra_days_to_simulate)])])
+
+    print('New method fits:')
+    print('------ Best SIR parameters:------ ')
+    print(parametersSIR[0])
+    print('Best SIR score:')
+    print(-scoresSIR[0])
+    print('------ Best SIR-DeltaD parameters:------ ')
+    print(parametersSIRDeltaD[0])
+    print('Best SIR score:')
+    print(-scoresSIRDeltaD[0])
+    print('------ Best SIUR parameters:------ ')
+    print(parametersSIUR[0])
+    print('Best SIUR score:')
+    print(-scoresSIUR[0])
+    if FitAge:
+        print('------ Best SItRD parameters:------ ')
+        print(parameters[0])
+        print('Best SItD score:')
+        print(-scores[0])
     
+  
     # figure with R_eff
     print('Ploting ...')
     
