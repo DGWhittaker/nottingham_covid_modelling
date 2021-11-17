@@ -1,5 +1,6 @@
 import os
 import argparse
+from pickle import NONE
 
 import cma
 import matplotlib.pyplot as plt
@@ -17,7 +18,7 @@ from nottingham_covid_modelling.lib.settings import Params, get_file_name_suffix
 from nottingham_covid_modelling.lib.error_measures import calculate_RMSE
 from nottingham_covid_modelling.lib.ratefunctions import calculate_R_instantaneous
 
-#FITING_MAPPING = {'default': ['rho', 'Iinit1', 'negative_binomial_phi'], 'full': ['rho', 'Iinit1', 'theta', 'xi','negative_binomial_phi']}
+
 neg_bin_fix_mu = 1e-12 
 
 # Functions
@@ -95,6 +96,9 @@ def run_optimise():
     SyntDataNum_file = args.syndata_num
     SquareLockdown = args.square_lockdown
     
+    max_iterations = None
+
+
     if debuging_flag:
         FitAge = True
         repeats = 1
@@ -103,6 +107,7 @@ def run_optimise():
         SquareLockdown = True
         travel_data =True
         np.random.seed(100)
+        max_iterations = 10
 
     if FitFull:
         Fitparams = 'full'
@@ -191,11 +196,69 @@ def run_optimise():
     DeltaD_SIR = int(p.death_mean - p.beta_mean)
     xi_SINR = 1 / (p.death_mean -p.beta_mean)
     
-    
     # define the params to optimize
     parameters_to_optimise_SIR = parameter_to_optimize_list(FitFull, FitStep, 'SIR')
     parameters_to_optimise_SIRDeltaD = parameter_to_optimize_list(FitFull, FitStep, 'SIRDeltaD')
     parameters_to_optimise_SINR = parameter_to_optimize_list(FitFull, FitStep, 'SIUR')
+
+
+    print('SIR model fitting using pints')
+    # Get noise model
+    noise_model = NOISE_MODEL_MAPPING['NegBinom']
+    # Get likelihood function
+
+    p.beta = beta_SIR
+    p.DeltaD = 0
+    p.theta = theta_SIR
+    LL_SIR = noise_model(p, data_D[p.day_1st_death_after_150220:] , parameters_to_optimise_SIR, model_func = get_model_SIR_solution)
+    # LL_SIRDel = noise_model(p, data.daily_deaths, parameters_to_optimise_SIR, model_func = get_model_SIR_solution)
+
+    upper_sigma = np.max(data_D)
+    log_prior = priors.LogPrior(LL_SIR, upper_sigma)
+
+
+    parameters_LL, scores_LL = [], []
+
+    # Tell CMA-ES about the bounds of this optimisation problem (helps it work out sensible sigma)
+    bounds = pints.RectangularBoundaries(log_prior.lower, log_prior.upper)
+
+    # Repeat optimisation multiple times from different initial guesses and pick best
+    for i in range(repeats):
+        print('Repeat: ' + str(i + 1))
+        # Random initial guesses from uniform priors
+        x0 = priors.get_good_starting_point(log_prior, LL_SIR, niterations=1000)
+
+        # Create optimiser
+        opt = pints.OptimisationController(LL_SIR, x0, boundaries=bounds, method=pints.CMAES)
+               
+        
+        opt.set_max_iterations(max_iterations)
+        opt.set_parallel(True)
+
+        # Run optimisation
+        with np.errstate(all='ignore'):  # Tell numpy not to issue warnings
+            xbest, fbest = opt.run()
+            parameters_LL.append(xbest)
+            scores_LL.append(-fbest)
+
+    # Sort according to smallest function score
+    order = np.argsort(scores_LL)
+    scores_LL = np.asarray(scores_LL)[order]
+    parameters_LL = np.asarray(parameters_LL)[order]
+
+    # Show results
+    print('Best parameters:')
+    print(parameters_LL[0])
+    print('Best score:')
+    print(-scores_LL[0])
+
+
+
+
+
+
+    
+    
     # define bounds and stds:
     bounds_SIR, stds_SIR = par_bounds(parameters_to_optimise_SIR) 
     bounds_SIRDeltaD, stds_SIRDeltaD = par_bounds(parameters_to_optimise_SIRDeltaD)
