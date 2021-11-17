@@ -9,13 +9,13 @@ fix_num = 1e-12
 class _LogLikelihood(pints.LogPDF):
     def __init__(self, settings, deaths,
                  parameters_to_optimise=['rho', 'Iinit1', 'lockdown_baseline', 'lockdown_fatigue'], 
-                 travel_data=True):
+                 travel_data=True, model_func = get_model_solution):
         self._p = settings
         self._y = deaths
         self._travel_data = travel_data
         self.parameter_labels = parameters_to_optimise
         self.flat_priors = self._p.flat_priors
-
+        self.model_func = model_func
 
     def __call__(self, x):
 
@@ -27,8 +27,9 @@ class _LogLikelihood(pints.LogPDF):
         assert len(x) == len(self.parameter_labels), 'Mismatch between parameter vector and label list length'
 
         param_dict = dict(zip(self.parameter_labels, x))
-        store_rate_vectors(param_dict, self._p)
-        m = get_model_solution(self._p, param_dict, self._travel_data)
+        if self.model_func == get_model_solution:
+            store_rate_vectors(param_dict, self._p)
+        m = self.model_func(self._p, param_dict, self._travel_data)
         assert len(m) == len(self._y), \
             "Mismatch between deaths and model_solution, have you used the DataLoader to load number of deaths?"
         return param_dict, m, self._y
@@ -62,8 +63,8 @@ class Gauss_LogLikelihood(_LogLikelihood):
 class NegBinom_LogLikelihood(_LogLikelihood):
     def __init__(self, settings, deaths,
                  parameters_to_optimise=['rho', 'Iinit1', 'lockdown_baseline', 'lockdown_fatigue'], 
-                 travel_data=True):
-        super().__init__(settings, deaths, parameters_to_optimise + ['negative_binomial_phi'], travel_data)
+                 travel_data=True, model_func = get_model_solution):
+        super().__init__(settings, deaths, parameters_to_optimise + ['negative_binomial_phi'], travel_data, model_func)
         if self._p.fix_phi:
             self.parameter_labels.remove('negative_binomial_phi')
 
