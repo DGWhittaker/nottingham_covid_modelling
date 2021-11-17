@@ -10,15 +10,17 @@ class LogPrior(pints.LogPrior):
     """
     Boundary constraints on the parameters
     """
-    def __init__(self, noise_model, upper_gaussian_noise_sigma):
+    def __init__(self, noise_model, upper_gaussian_noise_sigma, model_name = 'SItD'):
         super(LogPrior, self).__init__()
-
+        assert model_name in ['SIR', 'SIRDeltaD', 'SItD', 'SIUR'], "Unknown model"
         self.noise_model = noise_model
         self.upper_gaussian_noise_sigma = upper_gaussian_noise_sigma
 
         self.lower, self.upper = [], []
-
-        self._lower_rho, self._upper_rho = 1, 10
+        if model_name == 'SItD':
+            self._lower_rho, self._upper_rho = 1, 10
+        else:
+            self._lower_rho, self._upper_rho = 0, 2
         self._lower_Iinit1, self._upper_Iinit1 = 1, 5e7
         self._lower_lockdown_baseline, self._upper_lockdown_baseline = 0, 1
         self._lower_lockdown_fatigue, self._upper_lockdown_fatigue = 0, 0.1
@@ -32,6 +34,10 @@ class LogPrior(pints.LogPrior):
         self._lower_IFR, self._upper_IFR = 0, 1
         self._lower_gaussian_noise_sigma, self._upper_gaussian_noise_sigma = 0, self.upper_gaussian_noise_sigma
         self._lower_negative_binomial_phi, self._upper_negative_binomial_phi = 1e-12, 1
+        self._lower_theta, self._upper_theta = 0,1
+        self._lower_DeltaD, self._upper_DeltaD = 0, 50
+        self._lower_xi, self._upper_xi = 0, 1
+        
 
         for parameter_name in self.noise_model.parameter_labels:
             assert hasattr(self, '_lower_' + parameter_name), "Unknown parameter %s" % parameter_name
