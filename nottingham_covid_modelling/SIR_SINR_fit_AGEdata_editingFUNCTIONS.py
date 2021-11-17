@@ -200,41 +200,37 @@ def run_optimise():
     parameters_to_optimise_SIR = parameter_to_optimize_list(FitFull, FitStep, 'SIR')
     parameters_to_optimise_SIRDeltaD = parameter_to_optimize_list(FitFull, FitStep, 'SIRDeltaD')
     parameters_to_optimise_SIUR = parameter_to_optimize_list(FitFull, FitStep, 'SIUR')
-
-
-    print('SIR model fitting using pints')
+    # define bounds and stds:
+    bounds_SIR, stds_SIR = par_bounds(parameters_to_optimise_SIR) 
+    bounds_SIRDeltaD, stds_SIRDeltaD = par_bounds(parameters_to_optimise_SIRDeltaD)
+    bounds_SIUR, stds_SIUR= par_bounds(parameters_to_optimise_SIUR)
     # Get noise model
     noise_model = NOISE_MODEL_MAPPING['NegBinom']
-    # Get likelihood function
 
+
+    ## Optimization for the SIR model
+    print('--------------------SIR model fitting-----------')
     p.beta = beta_SIR
     p.DeltaD = 0
     p.theta = theta_SIR
+    print('*****Using pints****')
+    # Get likelihood function
     LL_SIR = noise_model(p, data_D[p.day_1st_death_after_150220:] , parameters_to_optimise_SIR, model_func = get_model_SIR_solution)
     # LL_SIRDel = noise_model(p, data.daily_deaths, parameters_to_optimise_SIR, model_func = get_model_SIR_solution)
-
     upper_sigma = np.max(data_D)
     log_prior = priors.LogPrior(LL_SIR, upper_sigma)
-
-
     parameters_LL, scores_LL = [], []
-
     # Tell CMA-ES about the bounds of this optimisation problem (helps it work out sensible sigma)
     bounds = pints.RectangularBoundaries(log_prior.lower, log_prior.upper)
-
     # Repeat optimisation multiple times from different initial guesses and pick best
     for i in range(repeats):
         print('Repeat: ' + str(i + 1))
         # Random initial guesses from uniform priors
         x0 = priors.get_good_starting_point(log_prior, LL_SIR, niterations=1000)
-
         # Create optimiser
         opt = pints.OptimisationController(LL_SIR, x0, boundaries=bounds, method=pints.CMAES)
-               
-        
         opt.set_max_iterations(max_iterations)
         opt.set_parallel(True)
-
         # Run optimisation
         with np.errstate(all='ignore'):  # Tell numpy not to issue warnings
             xbest, fbest = opt.run()
@@ -246,33 +242,7 @@ def run_optimise():
     scores_LL = np.asarray(scores_LL)[order]
     parameters_LL = np.asarray(parameters_LL)[order]
 
-    # Show results
-    print('Best parameters:')
-    print(parameters_LL[0])
-    print('Best score:')
-    print(-scores_LL[0])
-
-
-
-
-
-
-    
-    
-    # define bounds and stds:
-    bounds_SIR, stds_SIR = par_bounds(parameters_to_optimise_SIR) 
-    bounds_SIRDeltaD, stds_SIRDeltaD = par_bounds(parameters_to_optimise_SIRDeltaD)
-    bounds_SIUR, stds_SIUR= par_bounds(parameters_to_optimise_SIUR)
-    
-
-    ## Optimization for the SIR model
-    print('SIR model fitting.')
-    # Optimize only rho and Iinit:
-    print('------- SIR: Fitting -----------')
-    # Define theta
-    p.beta = beta_SIR
-    p.DeltaD = 0
-    p.theta = theta_SIR
+    print('*****SIR Using old method****')
     parametersSIR, scoresSIR, stddevSIR = [], [], []
     for i in range(repeats):
         print('SIR' +  Fitparams +  ' fitting Repeat: ' + str(i + 1))
@@ -280,8 +250,8 @@ def run_optimise():
         optsSIR.set("bounds", bounds_SIR)
         optsSIR.set("CMA_stds", stds_SIR)
         if debuging_flag:
-            optsSIR.set("maxfevals",10)
-            optsSIR.set("seed", 100)
+            optsSIR.set("maxfevals",max_iterations)
+            #optsSIR.set("seed", 100)
         x0_SIR = np.random.uniform(bounds_SIR[0][0], bounds_SIR[1][0])
         for j in range(len(bounds_SIR[0])-1):
             x0_SIR = np.append(x0_SIR, np.random.uniform(bounds_SIR[0][j+1], bounds_SIR[1][j+1]))
@@ -301,7 +271,6 @@ def run_optimise():
     # Extract best
     obtained_parameters_SIR = parametersSIR[0]
     obtained_stdev_SIR = stddevSIR[0]
-    
 
     # Store simulations for plotting
     p_dict_SIR = dict(zip(parameters_to_optimise_SIR, obtained_parameters_SIR))
@@ -322,13 +291,43 @@ def run_optimise():
     R_eff_s = ((rho_SIR * p.beta * alpha_SIR) / theta_fit_SIR) * (S_s / p.N)
     
     ## Optimization for the SIR-deltaD model
-    print('SIR-DeltaD model fitting.')
-    # Optimize only rho and Iinit:
-    print('------- SIR-DeltaD: Fitting -----------')
+    print('------------SIR-DeltaD model fitting.-----------')
     # Define theta
     p.beta = beta_SIR
     p.DeltaD = DeltaD_SIR
     p.theta = theta_SIR
+
+    print('***** Using pints ****')
+    # Get likelihood function
+    LL_SIRDeltaD = noise_model(p, data_D[p.day_1st_death_after_150220:] , parameters_to_optimise_SIRDeltaD, model_func = get_model_SIR_solution)
+    # LL_SIRDel = noise_model(p, data.daily_deaths, parameters_to_optimise_SIR, model_func = get_model_SIR_solution)
+    upper_sigma = np.max(data_D)
+    log_prior_DeltaD = priors.LogPrior(LL_SIRDeltaD, upper_sigma)
+    parameters_LLDeltaD, scores_LLDeltaD = [], []
+    # Tell CMA-ES about the bounds of this optimisation problem (helps it work out sensible sigma)
+    bounds_DeltaD = pints.RectangularBoundaries(log_prior_DeltaD.lower, log_prior_DeltaD.upper)
+    # Repeat optimisation multiple times from different initial guesses and pick best
+    for i in range(repeats):
+        print('Repeat: ' + str(i + 1))
+        # Random initial guesses from uniform priors
+        x0 = priors.get_good_starting_point(log_prior_DeltaD, LL_SIRDeltaD, niterations=1000)
+        # Create optimiser
+        opt = pints.OptimisationController(LL_SIRDeltaD, x0, boundaries=bounds_DeltaD, method=pints.CMAES)
+        opt.set_max_iterations(max_iterations)
+        opt.set_parallel(True)
+        # Run optimisation
+        with np.errstate(all='ignore'):  # Tell numpy not to issue warnings
+            xbest, fbest = opt.run()
+            parameters_LLDeltaD.append(xbest)
+            scores_LLDeltaD.append(-fbest)
+
+    # Sort according to smallest function score
+    order = np.argsort(scores_LLDeltaD)
+    scores_LLDeltaD = np.asarray(scores_LLDeltaD)[order]
+    parameters_LLDeltaD = np.asarray(parameters_LLDeltaD)[order]
+
+    # Optimize only rho and Iinit:
+    print('***** SIRDeltaD Using pints ****')
     parametersSIRDeltaD, scoresSIRDeltaD, stddevSIRDeltaD = [], [], []
     for i in range(repeats):
         print('SIR DeltaD' +  Fitparams +  ' fitting Repeat: ' + str(i + 1))
@@ -336,8 +335,8 @@ def run_optimise():
         optsSIRDeltaD.set("bounds", bounds_SIRDeltaD)
         optsSIRDeltaD.set("CMA_stds", stds_SIRDeltaD)
         if debuging_flag:
-            optsSIRDeltaD.set("maxfevals",10)
-            optsSIRDeltaD.set("seed", 100)
+            optsSIRDeltaD.set("maxfevals",max_iterations)
+            #optsSIRDeltaD.set("seed", 100)
         x0_SIRDeltaD = np.random.uniform(bounds_SIRDeltaD[0][0], bounds_SIRDeltaD[1][0])
         for j in range(len(bounds_SIRDeltaD[0])-1):
             x0_SIRDeltaD = np.append(x0_SIRDeltaD, np.random.uniform(bounds_SIRDeltaD[0][j+1], bounds_SIRDeltaD[1][j+1]))
@@ -381,14 +380,40 @@ def run_optimise():
 
     
     ## Optimization for the SIUR model
-    print('SIUR model fitting.')
-    # Optimize only rho and Iinit:
-    print('------- SIUR: Fitting rho and Iinit -----------')
+    print('----------------------SIUR model fitting-------------')
     # Define theta and xi
     p.theta = theta_SIUR
     p.xi = xi_SIUR
 
-    
+    print('*****Using pints****')
+    # Get likelihood function
+    LL_SIUR = noise_model(p, data_D[p.day_1st_death_after_150220:] , parameters_to_optimise_SIR, model_func = get_model_SIUR_solution)
+    upper_sigma = np.max(data_D)
+    log_prior_U = priors.LogPrior(LL_SIUR, upper_sigma)
+    parameters_LLU, scores_LLU = [], []
+    # Tell CMA-ES about the bounds of this optimisation problem (helps it work out sensible sigma)
+    bounds_U = pints.RectangularBoundaries(log_prior_U.lower, log_prior_U.upper)
+    # Repeat optimisation multiple times from different initial guesses and pick best
+    for i in range(repeats):
+        print('Repeat: ' + str(i + 1))
+        # Random initial guesses from uniform priors
+        x0 = priors.get_good_starting_point(log_prior_U, LL_SIUR, niterations=1000)
+        # Create optimiser
+        opt = pints.OptimisationController(LL_SIUR, x0, boundaries=bounds_U, method=pints.CMAES)
+        opt.set_max_iterations(max_iterations)
+        opt.set_parallel(True)
+        # Run optimisation
+        with np.errstate(all='ignore'):  # Tell numpy not to issue warnings
+            xbest, fbest = opt.run()
+            parameters_LLU.append(xbest)
+            scores_LLU.append(-fbest)
+
+    # Sort according to smallest function score
+    order = np.argsort(scores_LLU)
+    scores_LLU = np.asarray(scores_LLU)[order]
+    parameters_LLU = np.asarray(parameters_LLU)[order]
+
+    print('***** SIUR Using old method ****')
     parametersSIUR, scoresSIUR, stddevSIUR = [], [], []
     for i in range(repeats):
         print('SIUR' +  Fitparams +  ' fitting Repeat: ' + str(i + 1))
@@ -396,8 +421,8 @@ def run_optimise():
         optsSIUR.set("bounds", bounds_SIUR)
         optsSIUR.set("CMA_stds", stds_SIUR)
         if debuging_flag:
-            optsSIUR.set("maxfevals",10)
-            optsSIUR.set("seed", 100)
+            optsSIUR.set("maxfevals",max_iterations)
+            #optsSIUR.set("seed", 100)
         x0_SIUR = np.random.uniform(bounds_SIUR[0][0], bounds_SIUR[1][0])
         for j in range(len(bounds_SIUR[0])-1):
             x0_SIUR = np.append(x0_SIUR, np.random.uniform(bounds_SIUR[0][j+1], bounds_SIUR[1][j+1]))
@@ -450,9 +475,36 @@ def run_optimise():
         # MANUALLY correct that we set rho bigger than 1 for this case
         bounds_SItR[0][0] = 1
         
+        print('***** Using pints ****')
+        # Get likelihood function
+        LL_SItR = noise_model(p, data_D[p.day_1st_death_after_150220:] , parameters_to_optimise_SIR, model_func = get_model_solution)
+        upper_sigma = np.max(data_D)
+        log_prior_t = priors.LogPrior(LL_SItR, upper_sigma)
+        parameters_LLt, scores_LLt = [], []
+        # Tell CMA-ES about the bounds of this optimisation problem (helps it work out sensible sigma)
+        bounds_t = pints.RectangularBoundaries(log_prior_t.lower, log_prior_t.upper)
+        # Repeat optimisation multiple times from different initial guesses and pick best
+        for i in range(repeats):
+            print('Repeat: ' + str(i + 1))
+            # Random initial guesses from uniform priors
+            x0 = priors.get_good_starting_point(log_prior_t, LL_SItR, niterations=1000)
+            # Create optimiser
+            opt = pints.OptimisationController(LL_SItR, x0, boundaries=bounds_t, method=pints.CMAES)
+            opt.set_max_iterations(max_iterations)
+            opt.set_parallel(True)
+            # Run optimisation
+            with np.errstate(all='ignore'):  # Tell numpy not to issue warnings
+                xbest, fbest = opt.run()
+                parameters_LLt.append(xbest)
+                scores_LLt.append(-fbest)
+
+        # Sort according to smallest function score
+        order = np.argsort(scores_LLt)
+        scores_LLt = np.asarray(scores_LLt)[order]
+        parameters_LLt = np.asarray(parameters_LLt)[order]
 
         
-        print('Age model fitting using RMSE.')
+        print('********** Age model fitting using RMSE.***********')
         # Set up optimisation
         print('Selected data source: ' + 'simulatedAGE')
         #print('Storing results to: ' + filename_AGE + '.txt')
@@ -473,8 +525,8 @@ def run_optimise():
             opts.set("bounds", bounds_SItR)
             opts.set("CMA_stds", stds_SItR)
             if debuging_flag:
-                opts.set("maxfevals",10)
-                opts.set("seed", 100)
+                opts.set("maxfevals",max_iterations)
+                #opts.set("seed", 100)
             x0 = np.random.uniform(bounds_SItR[0][0], bounds_SItR[1][0])
             for j in range(len(bounds_SItR[0])-1):
                 x0 = np.append(x0, np.random.uniform(bounds_SItR[0][j+1], bounds_SItR[1][j+1]))
@@ -562,22 +614,22 @@ def run_optimise():
 
     print('New method fits:')
     print('------ Best SIR parameters:------ ')
-    print(parametersSIR[0])
+    print(parameters_LL[0])
     print('Best SIR score:')
-    print(-scoresSIR[0])
+    print(-scores_LL[0])
     print('------ Best SIR-DeltaD parameters:------ ')
-    print(parametersSIRDeltaD[0])
+    print(parameters_LLDeltaD[0])
     print('Best SIR score:')
-    print(-scoresSIRDeltaD[0])
+    print(-scores_LLDeltaD[0])
     print('------ Best SIUR parameters:------ ')
-    print(parametersSIUR[0])
+    print(parameters_LLU[0])
     print('Best SIUR score:')
-    print(-scoresSIUR[0])
+    print(-scores_LLU[0])
     if FitAge:
         print('------ Best SItRD parameters:------ ')
-        print(parameters[0])
+        print(parameters_LLt[0])
         print('Best SItD score:')
-        print(-scores[0])
+        print(-scores_LLt[0])
     
   
     # figure with R_eff
