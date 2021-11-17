@@ -1,3 +1,4 @@
+from time import monotonic
 import numpy as np
 import pints
 from nottingham_covid_modelling.lib.equations import get_model_solution, store_rate_vectors
@@ -41,8 +42,8 @@ class _LogLikelihood(pints.LogPDF):
 class Gauss_LogLikelihood(_LogLikelihood):
     def __init__(self, settings, deaths,
                  parameters_to_optimise=['rho', 'Iinit1', 'lockdown_baseline', 'lockdown_fatigue'], 
-                 travel_data=True):
-        super().__init__(settings, deaths, parameters_to_optimise + ['gaussian_noise_sigma'], travel_data)
+                 travel_data = True, model_func = get_model_solution):
+        super().__init__(settings, deaths, parameters_to_optimise + ['gaussian_noise_sigma'], travel_data, model_func)
         if self._p.fix_sigma:
             self.parameter_labels.remove('gaussian_noise_sigma')
 
