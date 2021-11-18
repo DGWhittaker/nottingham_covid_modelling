@@ -106,8 +106,8 @@ def run_optimise():
         SquareLockdown = True
         travel_data =True
         np.random.seed(100)
-        repeats = 10
-        max_iterations = None
+        repeats = 1
+        max_iterations = 10
 
     if FitFull:
         Fitparams = 'full'
@@ -196,6 +196,12 @@ def run_optimise():
     DeltaD_SIR = int(p.death_mean - p.beta_mean)
     xi_SIUR = 1 / (p.death_mean -p.beta_mean)
     
+    p.beta = 1
+    p.DeltaD = 0
+    p.theta = 1 / p.beta_mean
+    p.xi = 1 / (p.death_mean -p.beta_mean)
+
+    
     # define the params to optimize
     parameters_to_optimise_SIR = parameter_to_optimize_list(FitFull, FitStep, 'SIR')
     parameters_to_optimise_SIRDeltaD = parameter_to_optimize_list(FitFull, FitStep, 'SIRDeltaD')
@@ -207,9 +213,7 @@ def run_optimise():
 
     ## Optimization for the SIR model
     print('--------------------SIR model fitting-----------')
-    p.beta = beta_SIR
-    p.DeltaD = 0
-    p.theta = theta_SIR
+
     print('*****Using pints****')
     # Get likelihood function
     LL_SIR = noise_model(p, data_D[p.day_1st_death_after_150220:] , parameters_to_optimise_SIR, model_func = get_model_SIR_solution)
@@ -263,9 +267,7 @@ def run_optimise():
     ## Optimization for the SIR-deltaD model
     print('------------SIR-DeltaD model fitting.-----------')
     # Define theta
-    p.beta = beta_SIR
-    p.DeltaD = DeltaD_SIR
-    p.theta = theta_SIR
+
 
     print('***** Using pints ****')
     # Get likelihood function
@@ -322,8 +324,7 @@ def run_optimise():
     ## Optimization for the SIUR model
     print('----------------------SIUR model fitting-------------')
     # Define theta and xi
-    p.theta = theta_SIUR
-    p.xi = xi_SIUR
+
 
     print('*****Using pints****')
     # Get likelihood function
@@ -377,9 +378,7 @@ def run_optimise():
     if FitAge:
         print('Fitting SItR model')
         parameters_to_optimise =  parameter_to_optimize_list(FitFull, FitStep, 'SItD')
-        toy_values = [3, 1000, .001]
-        if FitStep:
-            toy_values.extend([p.lockdown_baseline, p.lockdown_offset])
+
 
         #filename_AGE = os.path.join(folder_path, get_file_name_suffix(p, 'syntheticSItRD-'+str(SyntDataNum_file), Noise_flag+'-maxtime-' + str(maxtime_fit), parameters_to_optimise))
 
