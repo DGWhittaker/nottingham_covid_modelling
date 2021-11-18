@@ -19,9 +19,10 @@ class LogPrior(pints.LogPrior):
         self.lower, self.upper = [], []
         if model_name == 'SItD':
             self._lower_rho, self._upper_rho = 1, 10
+            self._lower_Iinit1, self._upper_Iinit1 = 1, 5e7
         else:
             self._lower_rho, self._upper_rho = 0, 2
-        self._lower_Iinit1, self._upper_Iinit1 = 1, 5e7
+            self._lower_Iinit1, self._upper_Iinit1 = 1, 5e4
         self._lower_lockdown_baseline, self._upper_lockdown_baseline = 0, 1
         self._lower_lockdown_fatigue, self._upper_lockdown_fatigue = 0, 0.1
         self._lower_lockdown_offset, self._upper_lockdown_offset = 0, 100
