@@ -106,7 +106,7 @@ def run_optimise():
         SquareLockdown = True
         travel_data =True
         np.random.seed(100)
-        repeats = 5
+        repeats = 10
         max_iterations = None
 
     if FitFull:
@@ -215,7 +215,7 @@ def run_optimise():
     LL_SIR = noise_model(p, data_D[p.day_1st_death_after_150220:] , parameters_to_optimise_SIR, model_func = get_model_SIR_solution)
     # LL_SIRDel = noise_model(p, data.daily_deaths, parameters_to_optimise_SIR, model_func = get_model_SIR_solution)
     upper_sigma = np.max(data_D)
-    log_prior = priors.LogPrior(LL_SIR, upper_sigma)
+    log_prior = priors.LogPrior(LL_SIR, upper_sigma, model_name = 'SIR')
     parametersSIR, scoresSIR = [], []
     # Tell CMA-ES about the bounds of this optimisation problem (helps it work out sensible sigma)
     bounds = pints.RectangularBoundaries(log_prior.lower, log_prior.upper)
@@ -272,7 +272,7 @@ def run_optimise():
     LL_SIRDeltaD = noise_model(p, data_D[p.day_1st_death_after_150220:] , parameters_to_optimise_SIRDeltaD, model_func = get_model_SIR_solution)
     # LL_SIRDel = noise_model(p, data.daily_deaths, parameters_to_optimise_SIR, model_func = get_model_SIR_solution)
     upper_sigma = np.max(data_D)
-    log_prior_DeltaD = priors.LogPrior(LL_SIRDeltaD, upper_sigma)
+    log_prior_DeltaD = priors.LogPrior(LL_SIRDeltaD, upper_sigma, model_name = 'SIRDeltaD')
     parametersSIRDeltaD, scoresSIRDeltaD = [], []
     # Tell CMA-ES about the bounds of this optimisation problem (helps it work out sensible sigma)
     bounds_DeltaD = pints.RectangularBoundaries(log_prior_DeltaD.lower, log_prior_DeltaD.upper)
@@ -329,7 +329,7 @@ def run_optimise():
     # Get likelihood function
     LL_SIUR = noise_model(p, data_D[p.day_1st_death_after_150220:] , parameters_to_optimise_SIUR, model_func = get_model_SIUR_solution)
     upper_sigma = np.max(data_D)
-    log_prior_U = priors.LogPrior(LL_SIUR, upper_sigma)
+    log_prior_U = priors.LogPrior(LL_SIUR, upper_sigma, model_name = 'SIUR')
     parametersSIUR, scoresSIUR = [], []
     # Tell CMA-ES about the bounds of this optimisation problem (helps it work out sensible sigma)
     bounds_U = pints.RectangularBoundaries(log_prior_U.lower, log_prior_U.upper)
