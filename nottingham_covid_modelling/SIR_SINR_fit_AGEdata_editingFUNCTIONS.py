@@ -100,7 +100,7 @@ def run_optimise():
 
 
     if debuging_flag:
-        FitAge = True
+        FitAge = False
         FitFull = True
         FitStep = True
         SquareLockdown = True
