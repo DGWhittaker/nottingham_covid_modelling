@@ -102,7 +102,7 @@ setup(
             'nottingham_covid_modelling.SIR_SINR_AGE_models:SIR_SINR_AGE_model_default',
             'plot_SIR_fits_fig2='
                 'nottingham_covid_modelling.plot_fig1_SIR_SINR_fit_AGEdata:plot_SIR_fits_fig2',
-            'SIR_fit_debug='
+            'optimise_likelihood_anyModel='
             'nottingham_covid_modelling.optimise_likelihood_anyModel:run_optimise',
         ],
     },
