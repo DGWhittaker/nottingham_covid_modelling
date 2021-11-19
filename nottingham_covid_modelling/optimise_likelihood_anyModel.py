@@ -184,15 +184,15 @@ def run_optimise():
 
     # Sort according to smallest function score
     order = np.argsort(scores)
-    scoresSIR = np.asarray(scores)[order]
-    parametersSIR = np.asarray(parameters)[order]
+    scores = np.asarray(scores)[order]
+    parameters = np.asarray(parameters)[order]
 
 
     print('---- Summary ...')
     print('Best parameters: ')
-    print(parametersSIR[0])
+    print(parameters[0])
     print('Best score:')
-    print(-scoresSIR[0])
+    print(-scores[0])
 
 
      # Extract best
