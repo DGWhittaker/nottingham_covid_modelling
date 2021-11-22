@@ -40,7 +40,7 @@ def parameter_to_optimize_list(FitFull, FitStep, model_name):
 
 # Synthetic data file
 data_filename = 'SItRDmodel_ONSparams_noise_NB_NO-R_travel_TRUE_step_TRUE.npy'
-Figure_name = 'Figure3_test1.png'
+Figure_name = 'Figure3_testSEIUR.png'
 # Definiiton of parameters and  fits
 folder_fits = os.path.join(MODULE_DIR, 'cmaes_fits_SIR')
 folder_data = os.path.join(MODULE_DIR, 'out_SIRvsAGEfits')
@@ -239,7 +239,7 @@ print('Derived parameters')
 print('R_0          ' + str(round(R_0_data,2)) + '      ' + str(round(R_0_a,2)) + '     ' + str(round(R_0_s,2)) + '       ' + str(round(R_0_sD,2)) + '     ' + str(round(R_0_u,2))+ '     ' + str(round(R_0_e,2)))
 print('min{R_i}     ' + str(round(min(R_eff_data),2)) + '      ' + str(round(min(R_eff_a),2)) + '     ' + str(round(min(R_eff_s),2)) + '       ' + str(round(min(R_eff_sD),2)) + '   ' + str(round(min(R_eff_u),2))+ '   ' + str(round(min(R_eff_e),2)))
 print('argmin{Ri<1} ' + str(np.where(R_eff_data<1)[0][0]) + '      ' + str(np.where(R_eff_a<1)[0][0])  + '     ' + str(np.where(R_eff_s<1)[0][0])  + '       ' + str(np.where(R_eff_sD<1)[0][0])  + '   ' + str(np.where(R_eff_u<1)[0][0]) + '   ' + str(np.where(R_eff_e<1)[0][0]) )
-print('max{I_{i,1}x1000  ' + str(round(np.max(data_I[0,:])/1000,1)) + '      ' + str(round(np.max(Iday_a[0,: -(p.numeric_max_age + p.extra_days_to_simulate)])/1000,1)) + '     ' + str(round(np.max(Inew_s[: -(p.numeric_max_age + p.extra_days_to_simulate)])/1000,1)) + '       ' + str(round(np.max(Inew_sD[: -(p.numeric_max_age + p.extra_days_to_simulate)])/1000,1)) + '   ' + str(round(np.max(Inew_u[: -(p.numeric_max_age + p.extra_days_to_simulate)])/1000,1)) + '   ' + str(round(np.max(Enew_e[: -(p.numeric_max_age + p.extra_days_to_simulate)])/1000,1)))
+print('max{I_{i,1}x1000  ' + str(round(np.max(data_I[0,:])/1000,1)) + '      ' + str(round(np.max(Iday_a[0,: -(p.numeric_max_age + p.extra_days_to_simulate)])/1000,1)) + '     ' + str(round(np.max(Inew_s[: -(p.numeric_max_age + p.extra_days_to_simulate)])/1000,1)) + '       ' + str(round(np.max(Inew_sD[: -(p.numeric_max_age + p.extra_days_to_simulate)])/1000,1)) + '   ' + str(round(np.max(Inew_u[: -(p.numeric_max_age + p.extra_days_to_simulate)])/1000,1)) + '   ' + str(round(np.max(Inew_e[: -(p.numeric_max_age + p.extra_days_to_simulate)])/1000,1)))
 
 # figure with R_eff
 print('Ploting figure 3 ...')
@@ -255,7 +255,7 @@ ax.plot(t, Iday_a[0,:maxtime_fit], label = Model2_label)
 ax.plot(t, Inew_s[:maxtime_fit], label='SIRD')
 ax.plot(t, Inew_sD[:maxtime_fit], label=r'SIRD$_{\Delta D}$')
 ax.plot(t, Inew_u[:maxtime_fit], label='SIURD')
-ax.plot(t, Enew_e[:maxtime_fit], label='SEIURD')
+ax.plot(t, Inew_e[:maxtime_fit], label='SEIURD')
 ax.legend()
 ax.set_title('Daily new infections')
 ax.set_ylabel('Number')
