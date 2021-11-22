@@ -207,7 +207,7 @@ def solve_SIR_difference_equations(p, parameters_dictionary, travel_data):
     
     assert not travel_data or hasattr(p, 'alpha'), "If using travel data, it must be loaded into p using DataLoader"
     
-    assert hasattr(p, 'beta'), "Need to pre-define the rates"
+    assert hasattr(p, 'theta'), "Need to pre-define the rates"
     assert np.isscalar(p.beta), "The rate beta needs to be a scalar for this model"
     assert np.isscalar(p.theta), "The rate theta needs to be a scalar for this model"
 
@@ -253,11 +253,11 @@ def solve_SIR_difference_equations(p, parameters_dictionary, travel_data):
 
 def solve_SIUR_difference_equations(p, parameters_dictionary, travel_data):
 
-    '''Solves difference equations for SINRD model without infection age distribution'''
+    '''Solves difference equations for SIURD model without infection age distribution'''
 
     assert not travel_data or hasattr(p, 'alpha'), "If using travel data, it must be loaded into p using DataLoader"
 
-    assert hasattr(p, 'beta'), "Need to pre-define the rates"
+    assert hasattr(p, 'theta'), "Need to pre-define the rates"
     assert np.isscalar(p.beta), "The rate beta needs to be a scalar for this model"
     assert np.isscalar(p.theta), "The rate theta needs to be a scalar for this model"
     assert np.isscalar(p.xi), "The rate xi needs to be a scalar for this model"
@@ -271,12 +271,12 @@ def solve_SIUR_difference_equations(p, parameters_dictionary, travel_data):
     time_vector = range(p.maxtime)
 
     # Create arrays for susceptible (S), infectious (I) and new infections (Inew), non-infectious infected (N), recovered (R), and deceased (D) individuals
-    S, I, Inew, N, R, D = np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1)
+    S, I, Inew, U, R, D = np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1)
 
     # Initial conditions
-    I[0], R[0], D[0], N[0] = Iinit, 0, 0, 0
+    I[0], R[0], D[0], U[0] = Iinit, 0, 0, 0
     Inew[0] = Iinit
-    S[0] = p.N - (I[0] + R[0] + D[0] + N[0])
+    S[0] = p.N - (I[0] + R[0] + D[0] + U[0])
 
     # travel data
     if travel_data:
@@ -292,15 +292,78 @@ def solve_SIUR_difference_equations(p, parameters_dictionary, travel_data):
         Inew[i + 1] = ((S[i] / p.N) * rho * alpha[i] * beta * I[i])
         I[i + 1] = I[i] + Inew[i + 1] - theta * I[i]
         S[i + 1] = S[i] - Inew[i + 1]
-        N[i + 1] = N[i] + theta * I[i] -  xi * N[i]
+        U[i + 1] = U[i] + theta * I[i] -  xi * U[i]
         # Compute death and recovery per day
-        R[i + 1] = xi * (1 - p.IFR) * N[i]
-        D[i + 1] = xi * p.IFR *N[i]
+        R[i + 1] = xi * (1 - p.IFR) * U[i]
+        D[i + 1] = xi * p.IFR * U[i]
         if S[i+1]<0:
             S[i+1] =0
     
-    return S, I,Inew, N, R, D
+    return S, I,Inew, U, R, D
 
+
+def solve_SEIUR_difference_equations(p, parameters_dictionary, travel_data):
+
+    '''Solves difference equations for SEIURD model with E->I->U_> Erlang transtiions'''
+
+    assert not travel_data or hasattr(p, 'alpha'), "If using travel data, it must be loaded into p using DataLoader"
+
+    assert hasattr(p, 'theta'), "Need to pre-define the rates"
+    assert np.isscalar(p.beta), "The rate beta needs to be a scalar for this model"
+    assert np.isscalar(p.eta), "The rate eta needs to be a scalar for this model"
+    assert np.isscalar(p.theta), "The rate theta needs to be a scalar for this model"
+    assert np.isscalar(p.xi), "The rate xi needs to be a scalar for this model"
+    
+
+    rho = parameters_dictionary.get('rho', p.rho)
+    Iinit = parameters_dictionary.get('Iinit1', p.Iinit1)
+    theta = parameters_dictionary.get('theta',p.theta)
+    beta = parameters_dictionary.get('beta',p.beta)
+    eta = parameters_dictionary.get('eta',p.eta)
+    xi = parameters_dictionary.get('xi',p.xi)
+
+    time_vector = range(p.maxtime)
+
+    # Create arrays for susceptible (S),  new infections (Inew),  recovered (R), and deceased (D) individuals
+    S, Inew, Enew, R, D =  np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1)
+    # Create arrays for the Erlang dist compartments: E1, E2 (expossed), I1, I2 (infected), U1, U2 (non infectious)
+    E1, E2, I1, I2, U1, U2 = np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1)
+
+    # Initial conditions
+    I1[0], I2[0] = Iinit, 0
+    E1[0], E2[0], U1[0], U2[0] =  0, 0, 0, 0
+    R[0], D[0] =  0, 0
+    Enew[0] = 0
+    Inew[0] = Iinit
+    S[0] = p.N - (I1[0] + I2[0] + E1[0] + E2[0] + R[0] + D[0] + U1[0] + U2[0])
+
+    # travel data
+    if travel_data:
+        if p.square_lockdown:
+            alpha = step(p, lgoog_data=len(p.alpha), parameters_dictionary=parameters_dictionary)
+        else:
+            alpha = tanh_spline(p, lgoog_data=len(p.alpha), parameters_dictionary=parameters_dictionary)
+    else:
+        alpha = np.ones(p.maxtime)
+    
+    
+    for i in time_vector:
+        Enew[i + 1] = ((S[i] / p.N) * rho * alpha[i] * beta * (I1[i] + I2[i]))
+        S[i + 1] = S[i] - Enew[i + 1]
+        E1[i + 1] = E1[i] + Enew[i + 1] - 2 * eta * E1[i]
+        Inew[i + 1] = 2 * eta * E2[i]
+        E2[i + 1] = E2[i] + 2 * eta * E1[i] - 2 * eta * E2[i]
+        I1[i + 1] = I1[i] + 2 * eta * E2[i] - 2 * theta * I1[i]
+        I2[i + 1] = I2[i] + 2 * theta * I1[i] - 2 * theta * I2[i]
+        U1[i + 1] = U1[i] + 2 * theta * I2[i] -  2 * xi * U1[i]
+        U2[i + 1] = U2[i] + 2 * xi * U1[i] -  2 * xi * U2[i]
+        # Compute death and recovery per day
+        R[i + 1] = 2 * xi * (1 - p.IFR) * U2[i]
+        D[i + 1] = 2 * xi * p.IFR * U2[i]
+        if S[i+1]<0:
+            S[i+1] =0
+    
+    return S, E1, E2, Enew, I1, I2, Inew, U1, U2, R, D
 
 def get_model_SIR_solution(p, parameters_dictionary, travel_data = True):
 
@@ -315,4 +378,11 @@ def get_model_SIUR_solution(p, parameters_dictionary, travel_data = True):
     '''Returns model solution for SIUR model for given parameters'''
 
     _, _, _, _, _, D = solve_SIUR_difference_equations(p, parameters_dictionary=parameters_dictionary, travel_data = travel_data)
+    return D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate)]
+
+def get_model_SEIUR_solution(p, parameters_dictionary, travel_data = True):
+
+    '''Returns model solution for SIUR model for given parameters'''
+
+    _, _, _, _, _, _, _, _, _, _, D = solve_SEIUR_difference_equations(p, parameters_dictionary=parameters_dictionary, travel_data = travel_data)
     return D[p.day_1st_death_after_150220: -(p.numeric_max_age + p.extra_days_to_simulate)]

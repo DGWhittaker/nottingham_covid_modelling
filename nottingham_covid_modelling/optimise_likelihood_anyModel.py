@@ -11,21 +11,24 @@ import pints
 from nottingham_covid_modelling import MODULE_DIR
 # Load project modules
 from nottingham_covid_modelling.lib._command_line_args import NOISE_MODEL_MAPPING
-from nottingham_covid_modelling.lib.equations import  get_model_SIUR_solution, get_model_solution, get_model_SIR_solution
+from nottingham_covid_modelling.lib.equations import  get_model_SIUR_solution, get_model_solution, get_model_SIR_solution, get_model_SEIUR_solution
 from nottingham_covid_modelling.lib.settings import Params, get_file_name_suffix
 
 
-MODEL_FUNCIONS ={'SItD':get_model_solution, 'SIR': get_model_SIR_solution, 'SIRDeltaD': get_model_SIR_solution, 'SIUR':get_model_SIUR_solution}
+MODEL_FUNCIONS ={'SItD':get_model_solution, 'SIR': get_model_SIR_solution, 'SIRDeltaD': get_model_SIR_solution, 'SIUR':get_model_SIUR_solution, 'SEIUR':get_model_SEIUR_solution}
 
 # Functions
 def parameter_to_optimize_list(FitFull, FitStep, model_name):
     # Valid model_names: 'SIR', 'SIRDeltaD', 'SItD', 'SIUR' 
-    assert model_name in ['SIR', 'SIRDeltaD', 'SItD', 'SIUR'], "Unknown model"
+    assert model_name in ['SIR', 'SIRDeltaD', 'SItD', 'SIUR', 'SEIUR'], "Unknown model"
     parameters_to_optimise = ['rho', 'Iinit1']
     if FitFull:
         if model_name != 'SItD':
             parameters_to_optimise.extend(['theta'])
         if model_name == 'SIUR':
+            parameters_to_optimise.extend(['xi'])
+        if model_name == 'SEIUR':
+            parameters_to_optimise.extend(['eta'])
             parameters_to_optimise.extend(['xi'])
         if model_name == 'SIRDeltaD':
            parameters_to_optimise.extend(['DeltaD'])
@@ -92,6 +95,7 @@ def run_optimise():
     if ModelName != 'SItD':
         p.beta = 1
         p.theta = 1 / p.beta_mean
+        p.eta = 1 / p.beta_mean
         p.DeltaD = 0
         p.xi = 1 / (p.death_mean -p.beta_mean)
 

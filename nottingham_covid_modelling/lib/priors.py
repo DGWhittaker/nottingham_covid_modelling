@@ -12,7 +12,7 @@ class LogPrior(pints.LogPrior):
     """
     def __init__(self, noise_model, upper_gaussian_noise_sigma, model_name = 'SItD'):
         super(LogPrior, self).__init__()
-        assert model_name in ['SIR', 'SIRDeltaD', 'SItD', 'SIUR'], "Unknown model"
+        assert model_name in ['SIR', 'SIRDeltaD', 'SItD', 'SIUR', 'SEIUR'], "Unknown model"
         self.noise_model = noise_model
         self.upper_gaussian_noise_sigma = upper_gaussian_noise_sigma
 
@@ -38,7 +38,7 @@ class LogPrior(pints.LogPrior):
         self._lower_theta, self._upper_theta = 0,1
         self._lower_DeltaD, self._upper_DeltaD = 0, 50
         self._lower_xi, self._upper_xi = 0, 1
-        
+        self._lower_eta, self._upper_eta = 0, 1
 
         for parameter_name in self.noise_model.parameter_labels:
             assert hasattr(self, '_lower_' + parameter_name), "Unknown parameter %s" % parameter_name

@@ -7,7 +7,7 @@ import numpy as np
 from scipy.stats import nbinom
 from nottingham_covid_modelling.lib._save_to_file import save_np_to_file
 # Load project modules
-from nottingham_covid_modelling.lib.equations import solve_SIR_difference_equations, solve_difference_equations, solve_SIUR_difference_equations, store_rate_vectors, step, tanh_spline
+from nottingham_covid_modelling.lib.equations import solve_SIR_difference_equations, solve_difference_equations, solve_SIUR_difference_equations, store_rate_vectors, step, tanh_spline, solve_SEIUR_difference_equations
 from nottingham_covid_modelling.lib.settings import Params
 from nottingham_covid_modelling.lib.ratefunctions import calculate_R_instantaneous
 
@@ -55,11 +55,12 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
         p.square_lockdown = False
 
     
-    # Default parameters for the 3 models
+    # Default parameters for the 4 models
     rho = 3.203 #2.4
     rho_SIR = 3.203/p.beta_mean
     Iinit1 = 860 #1000
     beta_SIR = 1
+    eta = 1/p.beta_mean
     theta = 1/p.beta_mean
     xi = 1/(p.death_mean - p.beta_mean)
     DeltaD = 18-5
@@ -134,6 +135,20 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
     print(np.where(R_eff_u<1)[0][0])
     print(np.argmax(Inew_u[: -(p.numeric_max_age + p.extra_days_to_simulate)]))
     
+    ## SEIUR model
+    default_params_SIR = {'rho': rho_SIR, 'Iinit1': Iinit1}
+    p.eta = eta
+    S_e, E1_e, E2_e, Enew_e, I1_e, I2_e, Inew_e, U1_e, U2_e, R_e, D_e = solve_SEIUR_difference_equations(p, default_params_SIR, travel_data)
+    R_0_e = (rho_SIR * p.beta * 1) / p.theta
+    R_eff_e = ((rho_SIR * p.beta * p.alpha[:-p.extra_days_to_simulate]) / p.theta) * (S_i / p.N)
+    print('SEIUR')
+    print(round(R_0_e,2))
+    print([round(min(R_eff_e),2),round(max(R_eff_e),2)])
+    print(np.where(R_eff_e<1)[0][0])
+    print(np.argmax(Inew_e[: -(p.numeric_max_age + p.extra_days_to_simulate)]))
+
+
+
     # plot parameters
     # get a list of the xticklabels (one every STEP up to & including args.maxtime)
     xtickets = [i for i in range(150 + 1) if i % STEP == 0]
@@ -152,8 +167,9 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
     # Plots comparing models
     fig, (ax2, ax, ax3, ax4) = plt.subplots(4, 1, figsize=(8.0, 7.0))
     ax.plot(t, Iday_a[0,:150], label = Model2_label)
-    ax.plot(t, Inew_i[:150], label='SIRD')
-    ax.plot(t, Inew_u[:150], label='SIURD')
+    #ax.plot(t, Inew_i[:150], label='SIRD')
+    #ax.plot(t, Inew_u[:150], label='SIURD')
+    ax.plot(t, Inew_e[:150], label='SEIURD')
     ax.legend()
     ax.set_title('Daily new infections')
     ax.set_ylabel('Number')
@@ -164,6 +180,7 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
     ax2.plot(t, D_noise[:150],'b.', label = Model2_label+'+NB')
     #ax2.plot(t, D_i[:150], label='SIRD')
     #ax2.plot(t, D_u[:150], label='SIURD')
+    ax2.plot(t, D_e[:150], label='SIURD')
     ax2.legend()
     ax2.set_title('Daily deaths')
     ax2.set_ylabel('Number')
@@ -171,8 +188,9 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
     ax2.grid(True)
     plt.setp(ax2.get_xticklabels(), visible=False)
     ax3.plot(t, Itot_a[:150], label = Model2_label)
-    ax3.plot(t, I_i[:150], label='SIRD')
-    ax3.plot(t, I_u[:150] + N_u[:-(p.numeric_max_age + p.extra_days_to_simulate)], label='SIURD')
+    #ax3.plot(t, I_i[:150], label='SIRD')
+    #ax3.plot(t, I_u[:150] + N_u[:-(p.numeric_max_age + p.extra_days_to_simulate)], label='SIURD')
+    ax3.plot(t, I1_e[:150] + I2_e[:150], label='SEIURD')
     ax3.legend()
     ax3.set_title('Daily active infections')
     ax3.set_ylabel('Number')
@@ -182,6 +200,7 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
     ax4.plot(R_eff_a[:150]  , label = Model2_label + ' R_0 = ' + str( round(R_0_a, 2)))
     ax4.plot(R_eff_i[:150], label = 'SIRD R_0 = ' + str( round(R_0_i, 2)))
     ax4.plot(R_eff_u[:150], label = 'SIURD R_0 = ' + str( round(R_0_u, 2)))
+    ax4.plot(R_eff_e[:150], label = 'SEIURD R_0 = ' + str( round(R_0_e, 2)))
     ax4.legend()
     ax4.set_xlabel('Date')
     ax4.set_title(r'R$_{\rm{effective}}$')
@@ -190,6 +209,53 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
     ax4.grid(True)
     plt.tight_layout()
     
+
+    # Plots for SEIUR
+    fig, (ax2, ax3, ax, ax4, ax5) = plt.subplots(5, 1, figsize=(8.0, 7.0))
+    ax.plot(t, I1_e[:150], label = 'I1')
+    ax.plot(t, I2_e[:150], label='I2')
+    ax.plot(t, I1_e[:150] + I2_e[:150], label='Total')
+    ax.plot(t, Inew_e[:150],':', label='I new')
+    ax.plot(t, Enew_e[:150],':', label='E new')
+    ax.legend()
+    ax.set_title('SEIUR infections')
+    ax.set_ylabel('Number')
+    ax.set_xticks(xtickets)
+    ax.grid(True)
+    plt.setp(ax.get_xticklabels(), visible=False)
+    ax2.plot(t, S_e[:150], label = 'S')
+    ax2.legend()
+    ax2.set_title('SEIUR Susceptibles')
+    ax2.set_ylabel('Number')
+    ax2.set_xticks(xtickets)
+    ax2.grid(True)
+    plt.setp(ax2.get_xticklabels(), visible=False)
+    ax3.plot(t, E1_e[:150], label = 'I1')
+    ax3.plot(t, E2_e[:150], label='I2')
+    ax3.plot(t, E1_e[:150]+ E2_e[:150], label='Total')
+    ax3.legend()
+    ax3.set_title('Exposed')
+    ax3.set_ylabel('Number')
+    ax3.set_xticks(xtickets)
+    ax3.grid(True)
+    plt.setp(ax3.get_xticklabels(), visible=False)
+    ax4.plot(t, U1_e[:150], label = 'I1')
+    ax4.plot(t, U2_e[:150], label='I2')
+    ax4.plot(t, U1_e[:150] + U2_e[:150], label='Total')
+    ax4.legend()
+    ax4.set_title('Uninfected')
+    ax4.set_xticks(xtickets)
+    ax4.grid(True)
+    plt.setp(ax4.get_xticklabels(), visible=False)
+    ax5.plot(t, R_e[:150], label = 'R')
+    #ax5.plot(t, D_e[:150], label='D')
+    ax5.legend()
+    ax5.set_xlabel('date')
+    ax5.set_title('R and D')
+    ax5.set_xticks(xtickets)
+    ax5.set_xticklabels(xticklabels)
+    ax5.grid(True)
+    plt.tight_layout()
 
     # Save to file if path is provided
     if args.outputnumbers is not None:
