@@ -7,7 +7,7 @@ import numpy as np
 from scipy.stats import nbinom
 from nottingham_covid_modelling.lib._save_to_file import save_np_to_file
 # Load project modules
-from nottingham_covid_modelling.lib.equations import solve_SIR_difference_equations, solve_difference_equations, solve_SIUR_difference_equations, store_rate_vectors, step, tanh_spline, solve_SEIUR_difference_equations
+from nottingham_covid_modelling.lib.equations import solve_SIR_difference_equations, solve_difference_equations, solve_SIUR_difference_equations, store_rate_vectors, step, tanh_spline, solve_SEIUR_difference_equations, pseudo_IC_dist_SEIUR
 from nottingham_covid_modelling.lib.settings import Params
 from nottingham_covid_modelling.lib.ratefunctions import calculate_R_instantaneous
 
@@ -147,7 +147,30 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
     print(np.where(R_eff_e<1)[0][0])
     print(np.argmax(Inew_e[: -(p.numeric_max_age + p.extra_days_to_simulate)]))
 
+    i =1
+    print([E1_e[i],E2_e[i], I1_e[i], I2_e[i], U1_e[i], U2_e[i]] / (E1_e[i] + E2_e[i] + I1_e[i] + I2_e[i] + U1_e[i] + U2_e[i]))
+    print([E1_e[i],E2_e[i], I1_e[i], I2_e[i], U1_e[i], U2_e[i]])
+    print([ sum(R_e[:i]), sum(D_e[:i])])
 
+    i =10
+    print([E1_e[i],E2_e[i], I1_e[i], I2_e[i], U1_e[i], U2_e[i]] / (E1_e[i] + E2_e[i] + I1_e[i] + I2_e[i] + U1_e[i] + U2_e[i]))
+    print([E1_e[i],E2_e[i], I1_e[i], I2_e[i], U1_e[i], U2_e[i]])
+    print([ sum(R_e[:i]), sum(D_e[:i])])
+
+    i =30
+    print([E1_e[i],E2_e[i], I1_e[i], I2_e[i], U1_e[i], U2_e[i]] / (E1_e[i] + E2_e[i] + I1_e[i] + I2_e[i] + U1_e[i] + U2_e[i]))
+    print([E1_e[i],E2_e[i], I1_e[i], I2_e[i], U1_e[i], U2_e[i]])
+    print([ sum(R_e[:i]), sum(D_e[:i])])
+
+    i =100
+    print([E1_e[i],E2_e[i], I1_e[i], I2_e[i], U1_e[i], U2_e[i]] / (E1_e[i] + E2_e[i] + I1_e[i] + I2_e[i] + U1_e[i] + U2_e[i]))
+    print([E1_e[i],E2_e[i], I1_e[i], I2_e[i], U1_e[i], U2_e[i]])
+    print([ sum(R_e[:i]), sum(D_e[:i])])
+
+
+
+    x = pseudo_IC_dist_SEIUR(p,rho_SIR)
+    print(x)
 
     # plot parameters
     # get a list of the xticklabels (one every STEP up to & including args.maxtime)
