@@ -38,7 +38,10 @@ class LogPrior(pints.LogPrior):
         self._lower_theta, self._upper_theta = 0,1
         self._lower_DeltaD, self._upper_DeltaD = 0, 50
         self._lower_xi, self._upper_xi = 0, 1
-        self._lower_eta, self._upper_eta = 0, 1
+        if model_name == 'SEIUR':
+            self._lower_eta, self._upper_eta = 0, .5
+            self._lower_theta, self._upper_theta = 0, .5
+            self._lower_xi, self._upper_xi = 0, .5
 
         for parameter_name in self.noise_model.parameter_labels:
             assert hasattr(self, '_lower_' + parameter_name), "Unknown parameter %s" % parameter_name
