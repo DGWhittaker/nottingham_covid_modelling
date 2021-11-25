@@ -363,6 +363,18 @@ def solve_SEIUR_difference_equations(p, parameters_dictionary, travel_data):
         D[i + 1] = 2 * xi * p.IFR * U2[i]
         if S[i+1]<0:
             S[i+1] =0
+        #if E1[i+1]<0:
+        #    E1[i+1]=0
+        #if E2[i+1]<0:
+        #    E2[i+1]=0
+        #if I1[i+1]<0:
+        #    I1[i+1]=0
+        #if I2[i+1]<0:
+        #    I2[i+1]=0
+        #if U1[i+1]<0:
+        #    U1[i+1]=0
+        #if U2[i+1]<0:
+        #    U2[i+1]=0
     
     return S, E1, E2, Enew, I1, I2, Inew, U1, U2, R, D
 

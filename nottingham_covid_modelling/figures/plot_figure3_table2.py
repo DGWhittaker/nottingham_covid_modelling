@@ -40,7 +40,7 @@ def parameter_to_optimize_list(FitFull, FitStep, model_name):
 
 # Synthetic data file
 data_filename = 'SItRDmodel_ONSparams_noise_NB_NO-R_travel_TRUE_step_TRUE.npy'
-Figure_name = 'Figure3_testSEIUR2.png'
+Figure_name = 'Figure3.png'
 # Definiiton of parameters and  fits
 folder_fits = os.path.join(MODULE_DIR, 'cmaes_fits_SIR')
 folder_data = os.path.join(MODULE_DIR, 'out_SIRvsAGEfits')
