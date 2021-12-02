@@ -140,10 +140,10 @@ def plot_mcmc_series():
     # np.save('Rl1_samples_' + file_append + '.npy', Rl1_samples)
     # np.save('maxI_samples_' + file_append + '.npy', maxI_samples)
 
-    R0 = np.load('R0_samples_' + file_append + '.npy')
-    Rmin = np.load('Rmin_samples_' + file_append + '.npy')
-    Rl1 = np.load('Rl1_samples_' + file_append + '.npy')
-    maxI = np.load('maxI_samples_' + file_append + '.npy')
+    R0 = np.load('../R0_samples_' + file_append + '.npy')
+    Rmin = np.load('../Rmin_samples_' + file_append + '.npy')
+    Rl1 = np.load('../Rl1_samples_' + file_append + '.npy')
+    maxI = np.load('../maxI_samples_' + file_append + '.npy')
 
     R0_min, R0_max = np.min(R0), np.max(R0)
     R0x = np.linspace(R0_min, R0_max, 100)
@@ -175,5 +175,5 @@ def plot_mcmc_series():
     ax4.hist(maxI, bins=25, density=True, color='red')
     ax4.plot(maxIx, gaussian_kde(maxI)(maxIx))
     plt.tight_layout()
-    plt.savefig('posterior_outputs_' + file_append + '.svg')
-    # plt.show()
+    # plt.savefig('posterior_outputs_' + file_append + '.svg')
+    plt.show()
