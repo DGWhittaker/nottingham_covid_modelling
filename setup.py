@@ -104,6 +104,12 @@ setup(
                 'nottingham_covid_modelling.plot_fig1_SIR_SINR_fit_AGEdata:plot_SIR_fits_fig2',
             'optimise_likelihood_anyModel='
             'nottingham_covid_modelling.optimise_likelihood_anyModel:run_optimise',
+            'mcmc_anyModel='
+            'nottingham_covid_modelling.MCMC_anyModel:run_mcmc',
+            'plot_mcmc_anyModel='
+            'nottingham_covid_modelling.plot_MCMC_anyModel:plot_mcmc',
+            'plot_mcmc_anyModel_series='
+            'nottingham_covid_modelling.plot_MCMC_anyModel_series:plot_mcmc_series',
         ],
     },
 )
