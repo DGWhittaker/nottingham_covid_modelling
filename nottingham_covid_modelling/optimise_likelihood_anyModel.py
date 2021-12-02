@@ -1,7 +1,6 @@
 import os
 import argparse
 
-import cma
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta, date
 import nottingham_covid_modelling.lib.priors as priors
@@ -36,7 +35,6 @@ def parameter_to_optimise_list(FitFull, FitStep, model_name):
         parameters_to_optimise.extend(['lockdown_baseline', 'lockdown_offset'])
     return parameters_to_optimise
 
-
 def run_optimise():
     parser = argparse.ArgumentParser()
 
@@ -57,8 +55,6 @@ def run_optimise():
 
     # At the moment, syntethic data sets 2-9 have travel and step options only. There is only one data sets without step and one with neither travel nor step.
 
-
-
     args = parser.parse_args()
     repeats = args.repeats
     FitFull = args.fit_full
@@ -66,8 +62,6 @@ def run_optimise():
     ModelName = args.model_name
     SyntDataNum_file = args.syndata_num
     max_iterations = args.limit_pints_iterations
-
-
 
     # For reproducibility:
     np.random.seed(100)
@@ -96,17 +90,13 @@ def run_optimise():
         p.theta = 1 / p.beta_mean
         p.eta = 1 / p.beta_mean
         p.DeltaD = 0
-        p.xi = 1 / (p.death_mean -p.beta_mean)
-
-
-    
+        p.xi = 1 / (p.death_mean - p.beta_mean)
 
     # define the params to optimize
     parameters_to_optimise = parameter_to_optimise_list(FitFull, FitStep, ModelName)
     
     # Get noise model
     noise_model = NOISE_MODEL_MAPPING['NegBinom']
-
 
     # Get simulated Age data from file
     print('Getting simulated data...')
@@ -120,7 +110,6 @@ def run_optimise():
         full_fit_data_file = 'SynteticSItD_default_params_travel_TRUE_step_TRUE_' + str(SyntDataNum_file) + '.npy'
     data_filename = full_fit_data_file
     
-
     # Load data
     data = np.load(os.path.join(folder_path, data_filename ))
     data_S = data[:,0]
@@ -156,11 +145,9 @@ def run_optimise():
     os.makedirs(folder, exist_ok=True)  # Create CMA-ES output destination folder
     filename = os.path.join(folder, get_file_name_suffix(p, 'SimSItD-' + str(SyntDataNum_file) + rho_label, Noise_label + 'model-' + ModelName + '_full-fit-' + str(FitFull), parameters_to_optimise))
 
-    
     print('Selected data source: ' + data_filename)
     print('Selected noise model: Negative Binomial')
     print('Storing results to: ' + filename + '.txt')
-
 
     # Get likelihood function
     model_func = MODEL_FUNCTIONS[ModelName]
@@ -190,13 +177,11 @@ def run_optimise():
     scores = np.asarray(scores)[order]
     parameters = np.asarray(parameters)[order]
 
-
     print('---- Summary ...')
     print('Best parameters: ')
     print(parameters[0])
     print('Best score:')
     print(-scores[0])
-
 
      # Extract best
     obtained_parameters = parameters[0]
