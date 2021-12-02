@@ -1,6 +1,5 @@
 import os
 import argparse
-from pickle import NONE, TRUE
 
 import cma
 import matplotlib.pyplot as plt
