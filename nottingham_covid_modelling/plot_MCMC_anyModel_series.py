@@ -243,7 +243,7 @@ def plot_mcmc_series():
     ax3 = fig.add_subplot(313)
     ax3.grid(True)
     ax3.plot(R_eff_data[:maxtime_fit], color='red', label = r'Synthetic data $R_0 =$ ' + str( round(R_0_data, 2)))
-    ax3.plot(R_eff[:maxtime_fit], label = r'SIRD $R_0 = $' + str( round(R_0, 2)))
+    ax3.plot(R_eff[:maxtime_fit], label=ModelName + r' $R_0 = $' + str( round(R_0, 2)))
     ax3.legend()
     ax3.set_xlabel('Date')
     ax3.set_title(r'$\mathcal{R}$')
