@@ -52,8 +52,8 @@ def run_optimise():
                               "testing purposes, you probably don't want to use this to get meaningful results!"))
 
     parser.add_argument("--model_name", type=str, help="which model to use", choices=MODEL_FUNCIONS.keys(), default='SIR')
-    parser.add_argument("-full", "--fit_full", action='store_true', help='Whether to fit all the model parameters, or only [rho, I0, NB_phi], ', default=True)
-    parser.add_argument("-fitstep", "--fit_step", action='store_true', help='Whether to fit step parameters', default=True)
+    parser.add_argument("-full", "--fit_full", action='store_false', help='Whether to fit all the model parameters, or only [rho, I0, NB_phi], ', default=True)
+    parser.add_argument("-fitstep", "--fit_step", action='store_false', help='Whether to fit step parameters', default=True)
     parser.add_argument("--syndata_num", type=int, help="Give the number of the synthetic data set you want to fit, default 1", default=1)
 
     # At the moment, syntethic data sets 2-9 have travel and step options only. There is only one data sets without step and one with neither travel nor step.
