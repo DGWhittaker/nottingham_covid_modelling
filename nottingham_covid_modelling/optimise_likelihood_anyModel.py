@@ -18,7 +18,7 @@ from nottingham_covid_modelling.lib.settings import Params, get_file_name_suffix
 MODEL_FUNCIONS ={'SItD':get_model_solution, 'SIR': get_model_SIR_solution, 'SIRDeltaD': get_model_SIR_solution, 'SIUR':get_model_SIUR_solution, 'SEIUR':get_model_SEIUR_solution}
 
 # Functions
-def parameter_to_optimize_list(FitFull, FitStep, model_name):
+def parameter_to_optimise_list(FitFull, FitStep, model_name):
     # Valid model_names: 'SIR', 'SIRDeltaD', 'SItD', 'SIUR' 
     assert model_name in ['SIR', 'SIRDeltaD', 'SItD', 'SIUR', 'SEIUR'], "Unknown model"
     parameters_to_optimise = ['rho', 'Iinit1']
@@ -103,7 +103,7 @@ def run_optimise():
     
 
     # define the params to optimize
-    parameters_to_optimise = parameter_to_optimize_list(FitFull, FitStep, ModelName)
+    parameters_to_optimise = parameter_to_optimise_list(FitFull, FitStep, ModelName)
     
     # Get noise model
     noise_model = NOISE_MODEL_MAPPING['NegBinom']
