@@ -18,7 +18,7 @@ from nottingham_covid_modelling.lib.settings import Params, get_file_name_suffix
 from nottingham_covid_modelling.lib.error_measures import calculate_RMSE
 from nottingham_covid_modelling.lib.ratefunctions import calculate_R_instantaneous
 
-def parameter_to_optimize_list(FitFull, FitStep, model_name):
+def parameter_to_optimise_list(FitFull, FitStep, model_name):
     # Valid model_names: 'SIR', 'SIRDeltaD', 'SItD', 'SIUR' 
     assert model_name in ['SIR', 'SIRDeltaD', 'SItD', 'SIUR', 'SEIUR'], "Unknown model"
     parameters_to_optimise = ['rho', 'Iinit1']
@@ -51,11 +51,11 @@ filename_SIUR ='Data_SimSItD-1_rho_0-2_noise-model_NBphi_2e-3_model-SIUR_full-fi
 filename_SEIUR = 'Data_SimSItD-1_rho_0-2_noise-model_NBphi_2e-3_model-SEIUR_full-fit-True_square-lockdown_rho_Init1_lockdown-baseline_lockdown-offset.txt'
 filename_AGE ='Data_SimSItD-1_rho_0-2_noise-model_NBphi_2e-3_model-SItD_full-fit-True_square-lockdown_rho_Init1_lockdown-baseline_lockdown-offset.txt'
 
-parameters_to_optimise_SIUR = parameter_to_optimize_list(True, True, 'SIUR')
-parameters_to_optimise_SEIUR = parameter_to_optimize_list(True, True, 'SEIUR')
-parameters_to_optimise_SIR = parameter_to_optimize_list(True, True, 'SIR')
-parameters_to_optimise_SIRDeltaD = parameter_to_optimize_list(True, True, 'SIRDeltaD')
-parameters_to_optimise = parameter_to_optimize_list(True, True, 'SItD')
+parameters_to_optimise_SIUR = parameter_to_optimise_list(True, True, 'SIUR')
+parameters_to_optimise_SEIUR = parameter_to_optimise_list(True, True, 'SEIUR')
+parameters_to_optimise_SIR = parameter_to_optimise_list(True, True, 'SIR')
+parameters_to_optimise_SIRDeltaD = parameter_to_optimise_list(True, True, 'SIRDeltaD')
+parameters_to_optimise = parameter_to_optimise_list(True, True, 'SItD')
 # Load parameters
 obtained_parameters_SIR = np.loadtxt(os.path.join(folder_fits, filename_SIR))
 p_dict_SIR = dict(zip(parameters_to_optimise_SIR, obtained_parameters_SIR))
