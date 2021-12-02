@@ -14,7 +14,7 @@ from nottingham_covid_modelling.lib.equations import  get_model_SIUR_solution, g
 from nottingham_covid_modelling.lib.settings import Params, get_file_name_suffix
 
 
-MODEL_FUNCIONS ={'SItD':get_model_solution, 'SIR': get_model_SIR_solution, 'SIRDeltaD': get_model_SIR_solution, 'SIUR':get_model_SIUR_solution, 'SEIUR':get_model_SEIUR_solution}
+MODEL_FUNCTIONS ={'SItD':get_model_solution, 'SIR': get_model_SIR_solution, 'SIRDeltaD': get_model_SIR_solution, 'SIUR':get_model_SIUR_solution, 'SEIUR':get_model_SEIUR_solution}
 
 # Functions
 def parameter_to_optimise_list(FitFull, FitStep, model_name):
@@ -50,7 +50,7 @@ def run_optimise():
                         help=("limit pints to a maximum number of iterations. NOTE: this is mostly for debug and "
                               "testing purposes, you probably don't want to use this to get meaningful results!"))
 
-    parser.add_argument("--model_name", type=str, help="which model to use", choices=MODEL_FUNCIONS.keys(), default='SIR')
+    parser.add_argument("--model_name", type=str, help="which model to use", choices=MODEL_FUNCTIONS.keys(), default='SIR')
     parser.add_argument("-full", "--fit_full", action='store_false', help='Whether to fit all the model parameters, or only [rho, I0, NB_phi], ', default=True)
     parser.add_argument("-fitstep", "--fit_step", action='store_false', help='Whether to fit step parameters', default=True)
     parser.add_argument("--syndata_num", type=int, help="Give the number of the synthetic data set you want to fit, default 1", default=1)
@@ -163,7 +163,7 @@ def run_optimise():
 
 
     # Get likelihood function
-    model_func = MODEL_FUNCIONS[ModelName]
+    model_func = MODEL_FUNCTIONS[ModelName]
     LL = noise_model(p, data_D[p.day_1st_death_after_150220:] , parameters_to_optimise, model_func = model_func)
     upper_sigma = np.max(data_D)
     log_prior = priors.LogPrior(LL, upper_sigma, model_name = ModelName)
