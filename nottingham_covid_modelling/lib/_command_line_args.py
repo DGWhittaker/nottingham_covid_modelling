@@ -41,6 +41,6 @@ def get_parser(skip_data_folder=False):
                         help="whether to use flat priors",
                         default=False)
     if not skip_data_folder:
-        parser.add_argument("--datafolder", default=os.path.join(MODULE_DIR, '..', '..', 'data', 'archive', 'current'), type=str,
-                            help="full path of the folder where the data is located (default: ../../data/archive/current)")
+        parser.add_argument("--datafolder", default=os.path.join(MODULE_DIR, '..', 'data', 'archive', 'current'), type=str,
+                            help="full path of the folder where the data is located (default: ../data/archive/current)")
     return parser

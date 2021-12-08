@@ -23,7 +23,7 @@ class DataLoader(object):
 
         self.p.N = POPULATION[self.country_str]
         
-        self.data_dir = data_dir if data_dir is not None else os.path.join(MODULE_DIR, '..', '..', 'data', 'archive', 'current')
+        self.data_dir = data_dir if data_dir is not None else os.path.join(MODULE_DIR, '..', 'data', 'archive', 'current')
             
         self.google_data = self._get_google_data()
         self.lgoog_data = len(self.google_data)
