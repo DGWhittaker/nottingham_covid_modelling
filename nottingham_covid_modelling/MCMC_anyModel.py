@@ -51,6 +51,7 @@ def run_mcmc():
     parser.add_argument("-full", "--fit_full", action='store_false', help='Whether to fit all the model parameters, or only [rho, I0, NB_phi], ', default=True)
     parser.add_argument("-fitstep", "--fit_step", action='store_false', help='Whether to fit step parameters', default=True)
     parser.add_argument("--syndata_num", type=int, help="Give the number of the synthetic data set you want to fit, default 1", default=1)
+    parser.add_argument("--informative_priors", action='store_true', help='Whether to use informative priors', default=False)
 
     # At the moment, syntethic data sets 2-9 have travel and step options only. There is only one data sets without step and one with neither travel nor step.
 
@@ -146,7 +147,8 @@ def run_mcmc():
 
     # Get likelihood function
     model_func = MODEL_FUNCTIONS[ModelName]
-    p.flat_priors = True # This line is crucial, to avoid the normal prior on the lockdown offset
+    if not args.informative_priors:
+        p.flat_priors = True # This line is crucial, to avoid the normal prior on the lockdown offset
     LL = noise_model(p, data_D[p.day_1st_death_after_150220:], parameters_to_optimise, model_func=model_func)
     upper_sigma = np.max(data_D)
     log_prior = priors.LogPrior(LL, upper_sigma, model_name=ModelName)
