@@ -181,7 +181,8 @@ def plot_mcmc_series():
     elif ModelName == 'SIUR':
         S, _, Inew, _, _, D = solve_SIUR_difference_equations(p, p_dict, travel_data=True)    
     elif ModelName == 'SEIUR':
-        S, _, _, _, _, _, Inew, _, _, _, D = solve_SEIUR_difference_equations(p, p_dict, travel_data=True)
+        S, _, _, Enew, _, _, _, _, _, _, D = solve_SEIUR_difference_equations(p, p_dict, travel_data=True)
+        Inew = Enew
 
     # Calculate R_0 and R_eff
     if ModelName != 'SItD':
