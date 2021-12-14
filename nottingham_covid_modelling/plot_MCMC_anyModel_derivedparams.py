@@ -54,6 +54,7 @@ def plot_mcmc_derivedparams():
     parser.add_argument("--burn_in", help="number of MCMC iterations to ignore",
                         default=25000, type=int)
     parser.add_argument("--chain", type=int, help="which chain to use", default=1)
+    parser.add_argument("--informative_priors", action='store_true', help='Whether to use informative priors', default=False)
 
     args = parser.parse_args()
     FitFull = args.fit_full
@@ -75,7 +76,8 @@ def plot_mcmc_derivedparams():
     p.alpha = np.ones(p.maxtime)
     p.lockdown_baseline = 0.2814 #0.2042884852266899
     p.lockdown_offset = 31.57 #34.450147247864166
-    p.flat_priors = True
+    if not args.informative_priors:
+        p.flat_priors = True
     # For saving file names:
     rho_label = '_rho_0-2'  
     Noise_label = 'NBphi_2e-3_' 
@@ -254,5 +256,5 @@ def plot_mcmc_derivedparams():
         if args.show_plots:
             plt.show()
         else:
-            plt.savefig('posterior_outputs_' + file_append + '.png')
+            plt.savefig('out-mcmc/posterior_outputs_' + file_append + '.png')
 
