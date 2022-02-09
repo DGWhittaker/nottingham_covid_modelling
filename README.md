@@ -125,11 +125,11 @@ will print the console output to `mcmc_figure5.out` rather than to screen. Typin
 ### Figure 6
 Similarly to Figure 5, the results for Figure 6 rely on first obtaining the MAP estimate using CMA-ES. To generate the necessary CMA-ES files, type:
 
-- `optimise_model --ons_data --square --params_to_optimise rho Iinit1 lockdown_baseline lockdown_offset beta_mean beta_var death_mean death_var IFR --repeats 10`
+- `optimise_model --ons_data --square --params_to_optimise rho Iinit1 lockdown_baseline lockdown_offset beta_mean beta_var death_mean death_dispersion IFR --repeats 10`
 
 followed by
 
-- `mcmc --ons_data --square --params_to_optimise rho Iinit1 lockdown_baseline lockdown_offset beta_mean beta_var death_mean death_var IFR --niter 200000`
+- `mcmc --ons_data --square --params_to_optimise rho Iinit1 lockdown_baseline lockdown_offset beta_mean beta_var death_mean death_dispersion IFR --niter 200000`
 
 to run the Markov chain Monte Carlo (MCMC) sampling. Note here that we opted to run more repeats of the CMA-ES optimisation and more iterations of the MCMC due to the higher dimensionality of the problem.
 
