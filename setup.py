@@ -90,12 +90,6 @@ setup(
             'nottingham_covid_modelling.SIR_forward_model:SIR_forward_model',
             'hazards_exploration='
             'nottingham_covid_modelling.hazards_exploration:hazards_exploration',
-            'forward_model_forSIRtravel='
-            'nottingham_covid_modelling.forward_model_forSIRtravel:forward_model_forSIRtravel',
-            'SIR_SINR_fit_AGEdata='
-            'nottingham_covid_modelling.SIR_SINR_fit_AGEdata:run_optimise',
-            'SIR_SINR_fit_AGEdataNOnoise='
-            'nottingham_covid_modelling.SIR_SINR_fit_AGEdataNOnoise:run_optimise',
             'SIR_SINR_fit_ONSdata='
             'nottingham_covid_modelling.SIR_SINR_fit_DATA:run_optimise',
             'SIR_SINR_AGE_model_default='
