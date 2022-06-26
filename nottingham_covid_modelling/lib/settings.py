@@ -114,3 +114,58 @@ def get_file_name_suffix(p, country, noise, parameters_list):
     return filename
 
 
+def get_file_name_suffix_anymodel(p, data_name, rho_label, Noise_label, model_name, parameters_list):
+
+    filename = 'Data_' + data_name +  rho_label + '_' + Noise_label + 'model-' + model_name
+    
+    if p.square_lockdown:
+        filename = filename + '_square-lockdown'
+    if p.flat_priors:
+        filename = filename + '_flat-priors'
+
+    filename = filename + '_parameters-estimated_'    
+    for i in parameters_list:
+        filename = filename + '_' + i
+    return filename
+
+def parameter_to_optimise_list(FitFull, FitStep, model_name, params_fromOptions):
+    # Valid model_names: 'SIR', 'SIRDeltaD', 'SItD', 'SIUR' 
+    assert model_name in ['SIR', 'SIRDeltaD', 'SItD', 'SIUR', 'SEIUR'], "Unknown model"
+    SIR_params = ['rho','Iinit1', 'theta']
+    SIRDeltaD_params = ['rho','Iinit1', 'theta', 'DeltaD']
+    SIUR_params = ['rho','Iinit1', 'theta', 'xi']
+    SEIUR_params = ['rho','Iinit1', 'theta', 'eta', 'xi']
+    SItD_params = ['rho', 'Iinit1']
+    model_params = eval(model_name + '_params')
+
+    if FitFull:
+        parameters_to_optimise = model_params
+    else:
+        for parameter_name in params_fromOptions:
+            assert parameter_name in model_params, "For selected model, invalid parameter %s" % parameter_name
+        # Arange the parameters in the default way
+        parameters_to_optimise = [tuple for x in model_params for tuple in params_fromOptions if tuple == x]
+
+    if FitStep:  
+        parameters_to_optimise.extend(['lockdown_baseline', 'lockdown_offset'])
+
+    return parameters_to_optimise
+
+def get_parameter_names(parameters_to_optimise, FitStep):
+    parameter_names = []
+    if 'rho' in parameters_to_optimise:
+        parameter_names.extend([r'$\rho$'])
+    if 'Iinit1' in parameters_to_optimise:
+        parameter_names.extend([r'$I_0$'])
+    if 'theta' in parameters_to_optimise:
+        parameter_names.extend([r'$\theta$'])
+    if 'eta' in parameters_to_optimise:
+        parameter_names.extend([r'$\eta$'])
+    if 'xi' in parameters_to_optimise:
+        parameter_names.extend([r'$\xi$'])
+    if 'DeltaD' in parameters_to_optimise:
+        parameter_names.extend([r'$\Delta$D'])
+    if FitStep:  
+        parameter_names.extend([r'$\alpha_b$', r'$t^{*}$'])
+    parameter_names.extend([r'$\phi$'])
+    return parameter_names

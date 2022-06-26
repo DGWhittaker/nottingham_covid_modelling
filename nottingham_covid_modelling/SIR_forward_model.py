@@ -32,7 +32,6 @@ def SIR_forward_model(skip_data_folder=True):
 
     # Parameters to compare models:
     travel_data = args.travel_data
-    beta = 1 / p.beta_mean #0.5
     rho = 2.4
     gamma = (1-p.IFR) / p.recovery_mean # 0.2
     zeta = p.IFR / p.death_mean #0.002
@@ -55,7 +54,7 @@ def SIR_forward_model(skip_data_folder=True):
     
     # Simulate baseline model
     default_params = {'rho': rho, 'Iinit1': Iinit1}
-    p.beta = beta * np.ones((1, p.max_infected_age))
+    p.beta = 1 * np.ones((1, p.max_infected_age))
     p.gamma = gamma * np.ones((1, p.max_infected_age))
     p.zeta = zeta * np.ones((1, p.max_infected_age))
     
@@ -63,7 +62,6 @@ def SIR_forward_model(skip_data_folder=True):
 
     # Simulate basic SIR model
     default_params_SIR = {'rho': rho, 'Iinit1': Iinit1}
-    p.beta = beta
     p.IFR = phi
     #p.gamma = gamma
     #p.zeta = zeta
