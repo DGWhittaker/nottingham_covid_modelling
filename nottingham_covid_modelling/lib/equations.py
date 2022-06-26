@@ -208,20 +208,19 @@ def solve_SIR_difference_equations(p, parameters_dictionary, travel_data):
     assert not travel_data or hasattr(p, 'alpha'), "If using travel data, it must be loaded into p using DataLoader"
     
     assert hasattr(p, 'theta'), "Need to pre-define the rates"
-    assert np.isscalar(p.beta), "The rate beta needs to be a scalar for this model"
     assert np.isscalar(p.theta), "The rate theta needs to be a scalar for this model"
 
     rho = parameters_dictionary.get('rho', p.rho)
     Iinit = parameters_dictionary.get('Iinit1', p.Iinit1)
     theta = parameters_dictionary.get('theta',p.theta)
-    beta = parameters_dictionary.get('beta',p.beta)
     DeltaD = parameters_dictionary.get('DeltaD',p.DeltaD)
-    DeltaD = int(DeltaD)
-    
+    DeltaD_jump = int(DeltaD)
+    DeltaD_per = DeltaD - DeltaD_jump
+
     time_vector = range(p.maxtime)
 
     # Create arrays for susceptible (S), infected (I), new infections (Inew) recovered (R), and deceased (D) individuals
-    S, I, Inew, R, D = np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1 + DeltaD)
+    S, I, Inew, R, D = np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1), np.zeros(p.maxtime + 1 + DeltaD_jump)
 
     # Initial conditions
     I[0], R[0], D[0] = Iinit, 0, 0
@@ -239,12 +238,15 @@ def solve_SIR_difference_equations(p, parameters_dictionary, travel_data):
         
         
     for i in time_vector:
-        Inew[i + 1] = ((S[i] / p.N) * rho * alpha[i] * beta * I[i])
+        Inew[i + 1] = ((S[i] / p.N) * rho * alpha[i] * I[i])
         I[i + 1] = I[i] + Inew[i + 1] - theta * I[i]
         S[i + 1] = S[i] - Inew[i + 1]
         # Compute death and recovery per day
         R[i + 1] = theta * (1 - p.IFR) * I[i]
-        D[i + DeltaD + 1] = theta * p.IFR *I[i]
+        if i == 0:
+            D[i + DeltaD_jump + 1] = (1 - DeltaD_per) * theta * p.IFR *I[i] 
+        else:
+            D[i + DeltaD_jump + 1] = (1 - DeltaD_per) * theta * p.IFR *I[i] +  DeltaD_per * theta * p.IFR *I[i-1]
         if S[i+1]<0:
             S[i+1] =0
         
@@ -258,14 +260,12 @@ def solve_SIUR_difference_equations(p, parameters_dictionary, travel_data):
     assert not travel_data or hasattr(p, 'alpha'), "If using travel data, it must be loaded into p using DataLoader"
 
     assert hasattr(p, 'theta'), "Need to pre-define the rates"
-    assert np.isscalar(p.beta), "The rate beta needs to be a scalar for this model"
     assert np.isscalar(p.theta), "The rate theta needs to be a scalar for this model"
     assert np.isscalar(p.xi), "The rate xi needs to be a scalar for this model"
 
     rho = parameters_dictionary.get('rho', p.rho)
     Iinit = parameters_dictionary.get('Iinit1', p.Iinit1)
     theta = parameters_dictionary.get('theta',p.theta)
-    beta = parameters_dictionary.get('beta',p.beta)
     xi = parameters_dictionary.get('xi',p.xi)
 
     time_vector = range(p.maxtime)
@@ -289,7 +289,7 @@ def solve_SIUR_difference_equations(p, parameters_dictionary, travel_data):
     
     
     for i in time_vector:
-        Inew[i + 1] = ((S[i] / p.N) * rho * alpha[i] * beta * I[i])
+        Inew[i + 1] = ((S[i] / p.N) * rho * alpha[i] * I[i])
         I[i + 1] = I[i] + Inew[i + 1] - theta * I[i]
         S[i + 1] = S[i] - Inew[i + 1]
         U[i + 1] = U[i] + theta * I[i] -  xi * U[i]
@@ -309,7 +309,6 @@ def solve_SEIUR_difference_equations(p, parameters_dictionary, travel_data):
     assert not travel_data or hasattr(p, 'alpha'), "If using travel data, it must be loaded into p using DataLoader"
 
     assert hasattr(p, 'theta'), "Need to pre-define the rates"
-    assert np.isscalar(p.beta), "The rate beta needs to be a scalar for this model"
     assert np.isscalar(p.eta), "The rate eta needs to be a scalar for this model"
     assert np.isscalar(p.theta), "The rate theta needs to be a scalar for this model"
     assert np.isscalar(p.xi), "The rate xi needs to be a scalar for this model"
@@ -318,7 +317,6 @@ def solve_SEIUR_difference_equations(p, parameters_dictionary, travel_data):
     rho = parameters_dictionary.get('rho', p.rho)
     Iinit = parameters_dictionary.get('Iinit1', p.Iinit1)
     theta = parameters_dictionary.get('theta',p.theta)
-    beta = parameters_dictionary.get('beta',p.beta)
     eta = parameters_dictionary.get('eta',p.eta)
     xi = parameters_dictionary.get('xi',p.xi)
 
@@ -349,7 +347,7 @@ def solve_SEIUR_difference_equations(p, parameters_dictionary, travel_data):
     
     
     for i in time_vector:
-        Enew[i + 1] = ((S[i] / p.N) * rho * alpha[i] * beta * (I1[i] + I2[i]))
+        Enew[i + 1] = ((S[i] / p.N) * rho * alpha[i] * (I1[i] + I2[i]))
         S[i + 1] = S[i] - Enew[i + 1]
         E1[i + 1] = E1[i] + Enew[i + 1] - 2 * eta * E1[i]
         Inew[i + 1] = 2 * eta * E2[i]
@@ -363,18 +361,6 @@ def solve_SEIUR_difference_equations(p, parameters_dictionary, travel_data):
         D[i + 1] = 2 * xi * p.IFR * U2[i]
         if S[i+1]<0:
             S[i+1] =0
-        #if E1[i+1]<0:
-        #    E1[i+1]=0
-        #if E2[i+1]<0:
-        #    E2[i+1]=0
-        #if I1[i+1]<0:
-        #    I1[i+1]=0
-        #if I2[i+1]<0:
-        #    I2[i+1]=0
-        #if U1[i+1]<0:
-        #    U1[i+1]=0
-        #if U2[i+1]<0:
-        #    U2[i+1]=0
     
     return S, E1, E2, Enew, I1, I2, Inew, U1, U2, R, D
 
@@ -403,7 +389,7 @@ def get_model_SEIUR_solution(p, parameters_dictionary, travel_data = True):
 
 def pseudo_IC_dist_SEIUR(p,rho):
     ''' Returns the pseudo st st distribution of Exposed and Infected individuals at <almost> early infection.
-        It assumes that lambda = rho * beta since at early times alpha = 1.
+        It assumes that lambda = rho since at early times alpha = 1.
     '''
     #Leah and Simon Version:
     n_compartments = 6
@@ -412,22 +398,13 @@ def pseudo_IC_dist_SEIUR(p,rho):
     Pseudo_Leah = fsolve(pseudo_equation_SEIUR, x0, fparams)
     pseudo_dist = Pseudo_Leah / sum(Pseudo_Leah) #normalize solution
     
-    # Frank's version : CURRENTLY NOT WORKING
-    '''
-    A = np.zeros((p.max_infected_age, p.max_infected_age))
-    A[:, 0] = p.rho * p.beta[0,:]
-    for i in range(p.max_infected_age - 1):
-        A[ i, i + 1] = 1 - p.gamma[0, i] - p.zeta[0,i]
-    EigVal, Vvectors, Wvectors = la.eig(A,right = True, left = True)
-    pseudo_dist = Vvectors.real[:,1] / sum (Vvectors.real[:,1])
-    '''
     return pseudo_dist
 
 def pseudo_equation_SEIUR(x,fparams):
     n_compartments = 6
     p = fparams[0]
     rho = fparams[1]
-    lamba = rho * p.beta
+    lamba = rho
     F = np.zeros(n_compartments)
     denominator = x[0] + lamba*(x[2] + x[3]) - 2 * p.eta * x[0]
     F[0] = sum(x) - 1

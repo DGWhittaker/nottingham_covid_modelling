@@ -135,7 +135,6 @@ def run_optimise():
         return -f
     
     # Redefinition of parameters
-    beta_SIR = 1 # to fit all in the rho paramters
     # TOy parameters:
     theta = 1 / p.beta_mean
     DeltaD_SIR = int(p.death_mean - p.beta_mean)
@@ -181,7 +180,6 @@ def run_optimise():
     # Optimize only rho and Iinit:
     print('------- SIR: Fitting -----------')
     # Define theta
-    p.beta = beta_SIR
     p.DeltaD = 0
     p.theta = theta
     parametersSIR, scoresSIR, stddevSIR = [], [], []
@@ -232,15 +230,14 @@ def run_optimise():
     rho_SIR = p_dict_SIR.get('rho', p.rho)
     Iinit_SIR = p_dict_SIR.get('Iinit1', p.Iinit1)
     theta_fit_SIR = p_dict_SIR.get('theta',theta)
-    R_0_s = (rho_SIR * p.beta * 1) / theta_fit_SIR
-    R_eff_s = ((rho_SIR * p.beta * alpha_SIR) / theta_fit_SIR) * (S_s / p.N)
+    R_0_s = (rho_SIR * 1) / theta_fit_SIR
+    R_eff_s = ((rho_SIR* alpha_SIR) / theta_fit_SIR) * (S_s / p.N)
     
     ## Optimization for the SIR-deltaD model
     print('SIR-DeltaD model fitting.')
     # Optimize only rho and Iinit:
     print('------- SIR-DeltaD: Fitting -----------')
     # Define theta
-    p.beta = beta_SIR
     parametersSIRDeltaD, scoresSIRDeltaD, stddevSIRDeltaD = [], [], []
     for i in range(repeats):
         print('SIR DeltaD FULL fitting Repeat: ' + str(i + 1))
@@ -289,8 +286,8 @@ def run_optimise():
     rho_SIRDeltaD = p_dict_SIRDeltaD.get('rho', p.rho)
     Iinit_SIRDeltaD = p_dict_SIRDeltaD.get('Iinit1', p.Iinit1)
     theta_fit_SIRDeltaD = p_dict_SIRDeltaD.get('theta',theta)
-    R_0_sD = (rho_SIRDeltaD * p.beta * 1) / theta_fit_SIRDeltaD
-    R_eff_sD = ((rho_SIRDeltaD * p.beta * alpha_SIRDeltaD) / theta_fit_SIRDeltaD) * (S_sD / p.N)
+    R_0_sD = (rho_SIRDeltaD * 1) / theta_fit_SIRDeltaD
+    R_eff_sD = ((rho_SIRDeltaD * p * alpha_SIRDeltaD) / theta_fit_SIRDeltaD) * (S_sD / p.N)
 
    
 
@@ -299,7 +296,6 @@ def run_optimise():
     print('SIUR model fitting.')
     # Optimize only rho and Iinit:
     print('------- SIUR: Fitting rho and Iinit -----------')
-    p.beta = beta_SIR
     p.theta = theta
     p.xi = xi_SINR
     parametersSINR, scoresSINR, stddevSINR = [], [], []
@@ -349,8 +345,8 @@ def run_optimise():
     rho_SINR = p_dict_SINR.get('rho', p.rho)
     Iinit_SINR = p_dict_SINR.get('Iinit1', p.Iinit1)
     theta_fit_SINR = p_dict_SINR.get('theta',theta)
-    R_0_u = (rho_SINR * p.beta * 1) / theta_fit_SINR
-    R_eff_u = ((rho_SINR * p.beta * alpha_SINR) / theta_fit_SINR) * (S_u / p.N)
+    R_0_u = (rho_SINR * 1) / theta_fit_SINR
+    R_eff_u = ((rho_SINR * alpha_SINR) / theta_fit_SINR) * (S_u / p.N)
 
     
     # If Age fit required:

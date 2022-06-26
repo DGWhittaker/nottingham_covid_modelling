@@ -117,7 +117,7 @@ def plot_SIR_fits_fig2():
     p.day_1st_death_after_150220 = 22
     
     # Redefinition of parameters for SIR and SINR ( 1/mean)
-    beta_SIR = 1
+    #beta_SIR = 1
     theta_SIR = 1 / p.beta_mean
     theta_SINR = 1 / p.beta_mean
     DeltaD_SIR = int(p.death_mean - p.beta_mean)
@@ -127,7 +127,7 @@ def plot_SIR_fits_fig2():
     # Simulations
     #print('------- gettin SIR model -----------')
     # Define theta
-    p.beta = beta_SIR
+    #p.beta = beta_SIR
     p.DeltaD = 0
     p.theta = theta_SIR
     # update alpha
@@ -141,14 +141,14 @@ def plot_SIR_fits_fig2():
     rho_SIR = p_dict_SIR.get('rho', p.rho)
     Iinit_SIR = p_dict_SIR.get('Iinit1', p.Iinit1)
     theta_fit_SIR = p_dict_SIR.get('theta',theta_SIR)
-    R_0_s = (rho_SIR * p.beta * 1) / theta_fit_SIR
-    R_eff_s = ((rho_SIR * p.beta * alpha_SIR) / theta_fit_SIR) * (S_s / p.N)
+    R_0_s = (rho_SIR  * 1) / theta_fit_SIR
+    R_eff_s = ((rho_SIR * alpha_SIR) / theta_fit_SIR) * (S_s / p.N)
     
     
     
     #print('------- SIR-DeltaD: Fitting -----------')
     # Define theta
-    p.beta = beta_SIR
+    #p.beta = beta_SIR
     p.DeltaD = DeltaD_SIR
     p.theta = theta_SIR
     # update params:
@@ -162,8 +162,8 @@ def plot_SIR_fits_fig2():
     rho_SIRDeltaD = p_dict_SIRDeltaD.get('rho', p.rho)
     Iinit_SIRDeltaD = p_dict_SIRDeltaD.get('Iinit1', p.Iinit1)
     theta_fit_SIRDeltaD = p_dict_SIRDeltaD.get('theta',theta_SIR)
-    R_0_sD = (rho_SIRDeltaD * p.beta * 1) / theta_fit_SIRDeltaD
-    R_eff_sD = ((rho_SIRDeltaD * p.beta * alpha_SIRDeltaD) / theta_fit_SIRDeltaD) * (S_sD / p.N)
+    R_0_sD = (rho_SIRDeltaD  * 1) / theta_fit_SIRDeltaD
+    R_eff_sD = ((rho_SIRDeltaD  * alpha_SIRDeltaD) / theta_fit_SIRDeltaD) * (S_sD / p.N)
 
    
 
@@ -181,8 +181,8 @@ def plot_SIR_fits_fig2():
     rho_SINR = p_dict_SINR.get('rho', p.rho)
     Iinit_SINR = p_dict_SINR.get('Iinit1', p.Iinit1)
     theta_fit_SINR = p_dict_SINR.get('theta',theta_SINR)
-    R_0_u = (rho_SINR * p.beta * 1) / theta_fit_SINR
-    R_eff_u = ((rho_SINR * p.beta * alpha_SINR[:-p.extra_days_to_simulate]) / theta_fit_SINR) * (S_u / p.N)
+    R_0_u = (rho_SINR * 1) / theta_fit_SINR
+    R_eff_u = ((rho_SINR *  alpha_SINR[:-p.extra_days_to_simulate]) / theta_fit_SINR) * (S_u / p.N)
 
     
     #print('Fitting SItR model')
