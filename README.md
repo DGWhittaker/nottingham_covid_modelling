@@ -112,36 +112,65 @@ or without the `--plot_fit` input argument to save a PNG figure (also in [nottin
   
   
 ### Figure 4
-In order to generate and save synthetic data for Figure 4, type the following:
+In order to generate and save synthetic data for Figure 4-5, type the following:
 
 - `SIR_SINR_AGE_model_default -travel -step --outputnumbers FILENAME_WITH_FULL_PATH` 
 
 This will simulate the SItD model and some configuration of the simple models. The observation model will be simulated with a negative binomial distribution and saved as part of the SItD simulation. The exact data for Figure 3 can be found in `SItRDmodel_ONSparams_noise_NB_NO-R_travel_TRUE_step_TRUE.npy` in [nottingham_covid_modelling/out_SIRvsAGEfits](python/nottingham_covid_modelling/out_SIRvsAGEfits/).
 
   
-Before running the MCMC, we estimate MAPs for all models using CMA-ES optimisation. Run:
 
-- `optimise_likelihood_anymodel --model_name SIR --informative_priors` for the $SIRD$ model
-- `optimise_likelihood_anymodel --model_name SIRD --informative_priors` for the $SIRD_{\Delta D}$ model
-- `optimise_likelihood_anymodel --model_name SUIR --informative_priors` for the $SUIRD$ model
-- `optimise_likelihood_anymodel --model_name SEIUR --informative_priors` for the $SE^2I^2U^2RD$ model fiting all parameters
-[PLACEHOLDER]
-  - `optimise_likelihood_anymodel --model_name SEIUR --informative_priors --partial -pto rho Iinit1 ` for the $SE^2I^2U^2RD$ model fixing eta as $1/5.2 \approx 0.1923$ 
+To fit the current synthetic data to the simple models, and the SItD model, we estimate MAPs for all models using CMA-ES optimisation first. We repeat the optimization 100 times. To generate the files run:
 
+- `optimise_likelihood_anymodel --model_name SIR --informative_priors -r 100` for the $SIRD$ model
+- `optimise_likelihood_anymodel --model_name SItD --informative_priors ` for the $SI_tD$ model
+- `optimise_likelihood_anymodel --model_name SIRD --informative_priors -r 100` for the $SIRD_{\Delta D}$ model
+- `optimise_likelihood_anymodel --model_name SUIR --informative_priors -r 100` for the $SUIRD$ model
+- `optimise_likelihood_anymodel --model_name SEIUR --informative_priors -r 100` for the $SE^2I^2U^2RD$ model fiting all parameters
+- `optimise_likelihood_anymodel --model_name SEIUR --informative_priors -r 100 --partial -pto rho Iinit1 theta xi --fixed_eta 0.1923` for the $SE^2I^2U^2RD$ model fixing eta as $1/5.2 \approx 0.1923$ 
+ 
+ Then, we use the MAPS obtained before as initial step for 5 MCMC chains. To obtain the chains, run:
+ 
+ - `mcmc_anymodel --model_name SIR --informative_priors --out_mcmc out_mcmc_table2 -n 1000000 --chains5` for the $SIRD$ model
+- `mcmc_anymodel --model_name SItD --informative_priors --out_mcmc out_mcmc_table2 -n 1000000 --chains5` for the $SI_tD$ model
+- `mcmc_anymodel --model_name SIRD --informative_priors --out_mcmc out_mcmc_table2 -n 1000000 --chains5` for the $SIRD_{\Delta D}$ model
+- `mcmc_anymodel --model_name SUIR --informative_priors --out_mcmc out_mcmc_table2 -n 2000000 --chains5` for the $SUIRD$ model
+- `mcmc_anymodel --model_name SEIUR --informative_priors --out_mcmc out_mcmc_table2 -n 8000000 --chains5` for the $SE^2I^2U^2RD$ model fiting all parameters
+- `mcmc_anymodel --model_name SEIUR --informative_priors --out_mcmc out_mcmc_table2 -n 3000000 --chains5 --partial -pto rho Iinit1 theta xi --fixed_eta 0.1923` for the $SE^2I^2U^2RD$ model fixing eta as $1/5.2 \approx 0.1923$ 
+
+Note that we ran some of the models for longer than others. The corresponding chain files were really big for this figure, hence we only saved in the repository the corresponding exploratory plots. Such exploratory plots can be generated running:
+
+- `plot_mcmc_anymodel --model_name "model_str" --informative_priors --out_mcmc out_mcmc_table2 --chains5` for  `"model_str"` each of `{SIR, SItD, SIRDeltaD, SIUR, SEIUR}`.
+- `plot_mcmc_anymodel --model_name SEIUR --informative_priors --out_mcmc out_mcmc_table2 --chains5 --partial -pto rho Iinit1 theta xi --fixed_eta 0.1923` for the $SE^2I^2U^2RD$ model fixing eta as $1/5.2 \approx 0.1923$ 
   
-To fit the current synthetic data to the three simple models, and the SItD model, type the following:
-
-- `SIR_SINR_fit_AGEdata -r 10 -age -travel -step -fitstep` 
-
-This code authomatically saves the results in [nottingham_covid_modelling/out_SIRvsAGEfits](python/nottingham_covid_modelling/out_SIRvsAGEfits/).
-It will run 10 repeats of the CMA-ES optimization routine. You can change the number of repetitions by "-r N" where N is your desired repeats.
-It saves a PNG figure equivalent to Figure 4 in the paper (also in [nottingham_covid_modelling/out_SIRvsAGEfits](python/nottingham_covid_modelling/out_SIRvsAGEfits/)).
+ We reported the derived parameters obtained from the first chain of the previous MCMC calculation. You can calculate the derived parameters by running:
   
+- `plot_mcmc_anyModel_derivedparams --model_name "model_str" --informative_priors --out_mcmc out_mcmc_table2 --chains5` for  `"model_str"` each of `{SIR, SItD, SIRDeltaD}`.
+- `plot_mcmc_anyModel_derivedparams --model_name SIUR --informative_priors --out_mcmc out_mcmc_table2 --chains5 --burn_in 1000000` for  the $SIURD$ model.
+- `plot_mcmc_anyModel_derivedparams --model_name SEIUR --informative_priors --out_mcmc out_mcmc_table2 --chains5 --burn_in 3000000` for  the $SEIURD$ model fiting all parameters.
+- `plot_mcmc_anyModel_derivedparams --model_name SEIUR --informative_priors --out_mcmc out_mcmc_table2 --chains5 --burn_in 2000000 --partial -pto rho Iinit1 theta xi --fixed_eta 0.1923` for the $SE^2I^2U^2RD$ model fixing eta as $1/5.2 \approx 0.1923$ 
+  
+Then, figure 4 can be generated, along with prnting the first part of table 2, by running:
+
+ - `python nottingham_covid_modelling/figures/plot_figure3_table2.py`
+
+In this last code, the MAPS for each model are saved.
 
 
   
 ### Figure 5
 
+  Figure 5 is generated following the same steps as Figure 4, but adding the code for the corresponding fixed parameters. The exact code for the CMA-ES optimisation is:
+  
+  [PLACEHOLDER]
+  
+  - `optimise_likelihood_anymodel --model_name SIR --informative_priors -r 100` for the $SIRD$ model
+- `optimise_likelihood_anymodel --model_name SItD --informative_priors ` for the $SI_tD$ model
+- `optimise_likelihood_anymodel --model_name SIRD --informative_priors -r 100` for the $SIRD_{\Delta D}$ model
+- `optimise_likelihood_anymodel --model_name SUIR --informative_priors -r 100` for the $SUIRD$ model
+- `optimise_likelihood_anymodel --model_name SEIUR --informative_priors -r 100` for the $SE^2I^2U^2RD$ model fiting all parameters
+- `optimise_likelihood_anymodel --model_name SEIUR --informative_priors -r 100 --partial -pto rho Iinit1 theta xi --fixed_eta 0.1923` for the $SE^2I^2U^2RD$ model fixing eta as $1/5.2 \approx 0.1923$ 
+  
 
 ### Figure 6
 As mentioned before, the results for Figure 6 rely on first obtaining an estimate of MAPs using CMA-ES optimisation to be used as a starting point for Bayesian inference using MCMC. To generate the necessary CMA-ES files, type:
