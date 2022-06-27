@@ -94,6 +94,8 @@ This is both a waste of time and it will probably fail (some modules require add
 
 # Reproducing paper results
 ## Running simulations
+  
+  The results for Figure 4-7 rely on first obtaining an estimate of the maximum a posteriori probability (MAP) using CMA-ES optimisation, then using this as a starting point for Bayesian inference using MCMC. In each figure, that process will be explained first.
 
 ### Figure 3
 In order to generate the data used in Figure 3, type the following:
@@ -117,7 +119,15 @@ In order to generate and save synthetic data for Figure 4, type the following:
 This will simulate the SItD model and some configuration of the simple models. The observation model will be simulated with a negative binomial distribution and saved as part of the SItD simulation. The exact data for Figure 3 can be found in `SItRDmodel_ONSparams_noise_NB_NO-R_travel_TRUE_step_TRUE.npy` in [nottingham_covid_modelling/out_SIRvsAGEfits](python/nottingham_covid_modelling/out_SIRvsAGEfits/).
 
   
+Before running the MCMC, we estimate MAPs for all models using CMA-ES optimisation. Run:
+
+- `optimise_likelihood_anymodel --model_name SIR --informative_priors` for the $SIRD$ model
+- `optimise_likelihood_anymodel --model_name SIRD --informative_priors` for the $SIRD_{\Delta D}$ model
+- `optimise_likelihood_anymodel --model_name SUIR --informative_priors` for the $SUIRD$ model
+- `optimise_likelihood_anymodel --model_name SEIUR --informative_priors` for the $SE^2I^2U^2RD$ model fiting all parameters
 [PLACEHOLDER]
+  - `optimise_likelihood_anymodel --model_name SEIUR --informative_priors --partial -pto rho Iinit1 ` for the $SE^2I^2U^2RD$ model fixing eta as $1/5.2 \approx 0.1923$ 
+
   
 To fit the current synthetic data to the three simple models, and the SItD model, type the following:
 
@@ -126,13 +136,15 @@ To fit the current synthetic data to the three simple models, and the SItD model
 This code authomatically saves the results in [nottingham_covid_modelling/out_SIRvsAGEfits](python/nottingham_covid_modelling/out_SIRvsAGEfits/).
 It will run 10 repeats of the CMA-ES optimization routine. You can change the number of repetitions by "-r N" where N is your desired repeats.
 It saves a PNG figure equivalent to Figure 4 in the paper (also in [nottingham_covid_modelling/out_SIRvsAGEfits](python/nottingham_covid_modelling/out_SIRvsAGEfits/)).
+  
+
 
   
 ### Figure 5
 
 
 ### Figure 6
-The results for Figure 6 rely on first obtaining an estimate of the maximum a posteriori probability (MAP) using CMA-ES optimisation, then using this as a starting point for Bayesian inference using MCMC. To generate the necessary CMA-ES files, type:
+As mentioned before, the results for Figure 6 rely on first obtaining an estimate of MAPs using CMA-ES optimisation to be used as a starting point for Bayesian inference using MCMC. To generate the necessary CMA-ES files, type:
 
 - `optimise_model --ons_data --square --params_to_optimise rho Iinit1 lockdown_baseline lockdown_offset IFR`
 
