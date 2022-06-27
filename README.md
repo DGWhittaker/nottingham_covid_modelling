@@ -96,7 +96,21 @@ This is both a waste of time and it will probably fail (some modules require add
 ## Running simulations
 
 ### Figure 3
-In order to generate and save synthetic data for Figure 3, type the following:
+In order to generate the data used in Figure 3, type the following:
+
+- `optimise_model --optimise_likelihood --ons_data --square --params_to_optimise rho Iinit1 lockdown_baseline lockdown_offset IFR` for the step change in infectivity case
+- `optimise_model --optimise_likelihood --ons_data --square --alpha1 --params_to_optimise rho Iinit1 IFR` for the constant infectivity (herd immunity) case.
+
+These commands will run 5 repeats of the CMA-ES optimisation routine by default, and deposit the results in [nottingham_covid_modelling/cmaes_fits](python/nottingham_covid_modelling/cmaes_fits/). To quickly visualise SItD model output using the found parameters, simply type:
+
+- `plot_cma_fit --plot_fit --optimise_likelihood --ons_data --square --params_to_optimise rho Iinit1 lockdown_baseline lockdown_offset IFR` for the step change in infectivity case
+- `plot_cma_fit --plot_fit --optimise_likelihood --ons_data --square --alpha1 -pto rho Iinit1 IFR` for the constant infectivity (herd immunity) case
+
+or without the `--plot_fit` input argument to save a PNG figure (also in [nottingham_covid_modelling/cmaes_fits](python/nottingham_covid_modelling/cmaes_fits/)). For convenience, we saved the model outputs in `.npy` files which are accessed in the plotting script for Figure 3.
+  
+  
+### Figure 4
+In order to generate and save synthetic data for Figure 4, type the following:
 
 - `SIR_SINR_AGE_model_default -travel -step --outputnumbers FILENAME_WITH_FULL_PATH` 
 
@@ -111,24 +125,14 @@ To fit the current synthetic data to the three simple models, and the SItD model
 
 This code authomatically saves the results in [nottingham_covid_modelling/out_SIRvsAGEfits](python/nottingham_covid_modelling/out_SIRvsAGEfits/).
 It will run 10 repeats of the CMA-ES optimization routine. You can change the number of repetitions by "-r N" where N is your desired repeats.
-It saves a PNG figure equivalent to Figure 3 in the paper (also in [nottingham_covid_modelling/out_SIRvsAGEfits](python/nottingham_covid_modelling/out_SIRvsAGEfits/)).
+It saves a PNG figure equivalent to Figure 4 in the paper (also in [nottingham_covid_modelling/out_SIRvsAGEfits](python/nottingham_covid_modelling/out_SIRvsAGEfits/)).
 
-
-### Figure 4
-In order to generate the data used in Figure 4, type the following:
-
-- `optimise_model --optimise_likelihood --ons_data --square --params_to_optimise rho Iinit1 lockdown_baseline lockdown_offset IFR` for the step change in infectivity case
-- `optimise_model --optimise_likelihood --ons_data --square --alpha1 --params_to_optimise rho Iinit1 IFR` for the constant infectivity (herd immunity) case.
-
-These commands will run 5 repeats of the CMA-ES optimisation routine by default, and deposit the results in [nottingham_covid_modelling/cmaes_fits](python/nottingham_covid_modelling/cmaes_fits/). To quickly visualise SItD model output using the found parameters, simply type:
-
-- `plot_cma_fit --plot_fit --optimise_likelihood --ons_data --square --params_to_optimise rho Iinit1 lockdown_baseline lockdown_offset IFR` for the step change in infectivity case
-- `plot_cma_fit --plot_fit --optimise_likelihood --ons_data --square --alpha1 -pto rho Iinit1 IFR` for the constant infectivity (herd immunity) case
-
-or without the `--plot_fit` input argument to save a PNG figure (also in [nottingham_covid_modelling/cmaes_fits](python/nottingham_covid_modelling/cmaes_fits/)). For convenience, we saved the model outputs in `.npy` files which are accessed in the plotting script for Figure 4.
-
+  
 ### Figure 5
-The results for Figure 5 rely on first obtaining an estimate of the maximum a posteriori probability (MAP) using CMA-ES optimisation, then using this as a starting point for Bayesian inference using MCMC. To generate the necessary CMA-ES files, type:
+
+
+### Figure 6
+The results for Figure 6 rely on first obtaining an estimate of the maximum a posteriori probability (MAP) using CMA-ES optimisation, then using this as a starting point for Bayesian inference using MCMC. To generate the necessary CMA-ES files, type:
 
 - `optimise_model --ons_data --square --params_to_optimise rho Iinit1 lockdown_baseline lockdown_offset IFR`
 
@@ -142,8 +146,8 @@ to run the Markov chain Monte Carlo (MCMC) sampling. Note that each of these com
 
 will print the console output to `mcmc_figure5.out` rather than to screen. Typing `jobs` in the terminal will show the status, i.e. `Running` or `Done` (or `Exited` if there is some error).
 
-### Figure 6
-Similarly to Figure 5, the results for Figure 6 rely on first obtaining the MAP estimate using CMA-ES. To generate the necessary CMA-ES files, type:
+### Figure 7
+Similarly to Figure 6, the results for Figure 7 rely on first obtaining the MAP estimate using CMA-ES. To generate the necessary CMA-ES files, type:
 
 - `optimise_model --ons_data --square --params_to_optimise rho Iinit1 lockdown_baseline lockdown_offset beta_mean beta_var death_mean death_dispersion IFR --repeats 10`
 
