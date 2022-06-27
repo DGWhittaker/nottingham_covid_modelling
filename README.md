@@ -16,10 +16,10 @@ We *strongly* recommend installing and running the scripts in a virtual environm
 - go into the virtual environment `cd folder_name` folder
 - and activate `source ./bin/activate` (or `Scripts\activate` on Windows)
 - now get the source code from git: `git clone https://github.com/DGWhittaker/nottingham_covid_modelling.git`
-- install the required packages by typing `pip install -r requirements.txt`
+- go to repository folder and install the required packages by typing `pip install -r requirements.txt`
 - Now `pip install -e .` to install the *nottingham_covid_modelling* package itself
 
-## Running
+## Running SItD model
 - Now you have a number of different scripts available, which can be run from any directory once the *nottingham_covid_modelling* package has been installed. Each of these can be run with the `-h`  flag to get more information about available command line arguments.
 
 To run the basic forward model without Google mobility data, type:
@@ -45,6 +45,9 @@ To run the basic forward model without Google mobility data, type:
 The data used are processed from the [ONS website](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/deaths/datasets/weeklyprovisionalfiguresondeathsregisteredinenglandandwales).
 
 **Please Note:** If your folder names have spaces this might cause issues depending on the platform you're using. e.g. `users/user_name/OneDrive - The University of Nottingham` if things don't run check you don't have spaces in your folder names.
+
+## Running simpler models vs SItD model
+
 
 ## Folder structure
 - The `nottingham_covid_modelling/lib` folder contains modules used by the forward model: `data.py` retrieves stored Google mobility data and daily deaths, `equations.py` solves the SItD model difference equations, `error_measures.py` contains functions to calculate different error measures, `likelihood.py` and `priors.py` contain log-likelihood functions and priors, respectively, for different noise models, and `settings.py` contains default fixed parameter settings for the model.
