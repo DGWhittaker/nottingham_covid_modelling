@@ -59,6 +59,10 @@ You can control which parameters to fit using the option `-partial -pto "paramet
 
 `mcmc_anymodel "model_and_paramter_options"` where `"model_and_paramter_options"` are the model and parameter specifications previously run with `optimise_likelihood_anymodel`
 
+- To generate diagnostic plots for the mcmc, run:
+
+`plot_mcmc_anymodel "model_and_paramter_options_on_mcmc"` where `"model_and_paramter_options_on_mcmc"` are the model and parameter specifications previously run with `mcmc_anymodel`
+
 ## Folder structure
 - The `nottingham_covid_modelling/lib` folder contains modules used by the forward model: `data.py` retrieves stored Google mobility data and daily deaths, `equations.py` solves the SItD model difference equations, `error_measures.py` contains functions to calculate different error measures, `likelihood.py` and `priors.py` contain log-likelihood functions and priors, respectively, for different noise models, and `settings.py` contains default fixed parameter settings for the model.
 - Google mobility data are retrieved from [here](https://www.google.com/covid19/mobility/).
