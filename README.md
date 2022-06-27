@@ -152,7 +152,7 @@ Note that we ran some of the models for longer than others. The corresponding ch
   
 Then, figure 4 can be generated, along with prnting the first part of table 2, by running:
 
- - `python nottingham_covid_modelling/figures/plot_figure3_table2.py`
+ - `python nottingham_covid_modelling/figures/plot_figure4_table2.py`
 
 In this last code, the MAPS for each model are saved.
 
@@ -161,16 +161,15 @@ In this last code, the MAPS for each model are saved.
 ### Figure 5
 
   Figure 5 is generated following the same steps as Figure 4, but adding the code for the corresponding fixed parameters. The exact code for the CMA-ES optimisation is:
+
   
-  [PLACEHOLDER]
+- `optimise_likelihood_anymodel --model_name SIR --informative_priors -r 100  --partial -pto rho Iinit1 --fixed_theta 0.1923` for the $SIRD$ model with $$\theta = 1/5.2 \approx  0.1923.$$.
+- `optimise_likelihood_anymodel --model_name SItD --informative_priors ` for the $SI_tD$ model.
+- `optimise_likelihood_anymodel --model_name SIRD --informative_priors -r 100 --partial -pto rho Iinit1 --fixed_theta 0.1923` for the $SIRD_{\Delta D}$ model with $$\theta = 1/5.2 \approx  0.1923, \quad \Delta D = 18.69 - 1 - 5.2.$$
+- `optimise_likelihood_anymodel --model_name SUIR --informative_priors -r 100 --partial -pto rho Iinit1 --fixed_theta 0.1923` for the $SUIRD$ model with $$\theta = 1/5.2 \approx  0.1923 , \quad \xi = 1/ (18.69 - 1 - 5.2.)$$
+- `optimise_likelihood_anymodel --model_name SEIUR --informative_priors -r 100 --partial -pto rho Iinit1 --fixed_eta 0.3362 --fixed_theta 0.3362` for the $SE^2I^2U^2RD$ model with $$\theta = \eta  = 1/2.974653 \approx 0.3362, \quad \xi =  1 / 11.744308.$$
   
-  - `optimise_likelihood_anymodel --model_name SIR --informative_priors -r 100` for the $SIRD$ model
-- `optimise_likelihood_anymodel --model_name SItD --informative_priors ` for the $SI_tD$ model
-- `optimise_likelihood_anymodel --model_name SIRD --informative_priors -r 100` for the $SIRD_{\Delta D}$ model
-- `optimise_likelihood_anymodel --model_name SUIR --informative_priors -r 100` for the $SUIRD$ model
-- `optimise_likelihood_anymodel --model_name SEIUR --informative_priors -r 100` for the $SE^2I^2U^2RD$ model fiting all parameters
-- `optimise_likelihood_anymodel --model_name SEIUR --informative_priors -r 100 --partial -pto rho Iinit1 theta xi --fixed_eta 0.1923` for the $SE^2I^2U^2RD$ model fixing eta as $1/5.2 \approx 0.1923$ 
-  
+    [PLACEHOLDER]
 
 ### Figure 6
 As mentioned before, the results for Figure 6 rely on first obtaining an estimate of MAPs using CMA-ES optimisation to be used as a starting point for Bayesian inference using MCMC. To generate the necessary CMA-ES files, type:
