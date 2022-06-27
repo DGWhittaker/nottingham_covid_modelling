@@ -93,18 +93,6 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
         NB_p = 1 / (1 + D_a[i] * negative_binomial_phi)
         D_noise[i] = nbinom.rvs(NB_n, NB_p)
     
-
-    # folder to load data
-    folder_path =  os.path.join(MODULE_DIR, 'out_SIRvsAGEfits')
-    data_filename = 'SItRDmodel_ONSparams_noise_NB_NO-R_travel_TRUE_step_TRUE.npy'
-    # Load data
-    data = np.load(os.path.join(folder_path, data_filename ))
-    data_S = data[:,0]
-    data_Itot = data[:,1]
-    data_R = data[:,2]
-    data_Dreal = data[:,3]
-    data_D = data[:,4] # noise data
-
     # Simulate basic SIR model
     # Parameters as per test fro DeltaD jump in values
     rho =  6.13277765937448871e-01 
@@ -187,7 +175,7 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
     ax.grid(True)
     plt.setp(ax.get_xticklabels(), visible=False)
     ax2.plot(t, D_a[:150], label = Model2_label)
-    ax2.plot(t, data_D[:150],'b.', label = Model2_label+'+NB')
+    ax2.plot(t, D_noise[:150],'b.', label = Model2_label+'+NB')
     ax2.plot(t, D_i[:150], label='SIRD')
     #ax2.plot(t, D_u[:150], label='SIURD')
     #ax2.plot(t, D_e[:150], label='SIURD')
@@ -219,43 +207,6 @@ def SIR_SINR_AGE_model_default(skip_data_folder=True):
     ax4.grid(True)
     plt.tight_layout()
     
-
-    # Plots for a specific model
-    fig, (ax2, ax3, ax, ax5) = plt.subplots(4, 1, figsize=(8.0, 7.0))
-    ax.plot(t, I_i[:150], label = 'I')
-    #ax.plot(t, I2_e[:150], label='I2')
-    ax.plot(t, Inew_i[:150],':', label='I')
-    #ax.plot(t, Enew_e[:150],':', label='E new')
-    ax.legend()
-    ax.set_title('SIRDeltaD infections')
-    ax.set_ylabel('Number')
-    ax.set_xticks(xtickets)
-    ax.grid(True)
-    plt.setp(ax.get_xticklabels(), visible=False)
-    ax2.plot(t, S_i[:150], label = 'S')
-    ax2.legend()
-    ax2.set_title('SIRDeltaD Susceptibles')
-    ax2.set_ylabel('Number')
-    ax2.set_xticks(xtickets)
-    ax2.grid(True)
-    plt.setp(ax2.get_xticklabels(), visible=False)
-    ax3.plot(t, D_i[:150], label = 'D')
-    ax3.legend()
-    ax3.set_title('Deaths')
-    ax3.set_ylabel('Number')
-    ax3.set_xticks(xtickets)
-    ax3.grid(True)
-    plt.setp(ax3.get_xticklabels(), visible=False)
-    ax5.plot(t, R_i[:150], label = 'R')
-    #ax5.plot(t, D_e[:150], label='D')
-    ax5.legend()
-    ax5.set_xlabel('date')
-    ax5.set_title('R and D')
-    ax5.set_xticks(xtickets)
-    ax5.set_xticklabels(xticklabels)
-    ax5.grid(True)
-    plt.tight_layout()
-
     # Save to file if path is provided
     if args.outputnumbers is not None:
         S_a = S_a * np.ones((1, S_a.size))
