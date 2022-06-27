@@ -31,7 +31,7 @@ def run_optimise():
     parser.add_argument("--model_name", type=str, help="which model to use", choices=MODEL_FUNCTIONS.keys(), default='SIR')
     parser.add_argument("-partial", "--fit_partial", action='store_true', help='Whether to fit a subset of the model  parameters (see \"-pto\"), ', default=False)
     parser.add_argument("-pto", "--params_to_optimise", nargs='+', type=str,  \
-                        help="If \"--fit_full\" is not given, select which parameters to optimise, e.g. -pto rho Iinit1 eta. This \
+                        help="If \"--partial\" is true, select which parameters to optimise, e.g. -pto rho Iinit1 eta. This \
                         flag do not include the step parameters (see \"-fitstep\").\
                         OPTIONS FOR EACH MODEL ------ (1)SIR: rho Iinit1 theta; \
                         (2)SIRDeltaD: rho Iinit1 theta DeltaD; (3)SIUR: rho Iinit1 theta xi;  \
