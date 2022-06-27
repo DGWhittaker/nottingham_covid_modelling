@@ -102,6 +102,9 @@ In order to generate and save synthetic data for Figure 3, type the following:
 
 This will simulate the SItD model and some configuration of the simple models. The observation model will be simulated with a negative binomial distribution and saved as part of the SItD simulation. The exact data for Figure 3 can be found in `SItRDmodel_ONSparams_noise_NB_NO-R_travel_TRUE_step_TRUE.npy` in [nottingham_covid_modelling/out_SIRvsAGEfits](python/nottingham_covid_modelling/out_SIRvsAGEfits/).
 
+  
+[PLACEHOLDER]
+  
 To fit the current synthetic data to the three simple models, and the SItD model, type the following:
 
 - `SIR_SINR_fit_AGEdata -r 10 -age -travel -step -fitstep` 
