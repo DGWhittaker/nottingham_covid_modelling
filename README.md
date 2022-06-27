@@ -47,7 +47,17 @@ The data used are processed from the [ONS website](https://www.ons.gov.uk/people
 **Please Note:** If your folder names have spaces this might cause issues depending on the platform you're using. e.g. `users/user_name/OneDrive - The University of Nottingham` if things don't run check you don't have spaces in your folder names.
 
 ## Running simpler models vs SItD model
+- Our code is designed to mimic the results from the SItD model using any of our simpler models to synthetic data similar to the trued death data of the first wave of infection at England and Gales. 
 
+- To find the MAPs for all parameters of a particular model, type:
+
+`optimise_likelihood_anymodel --model_name "model_str" --informative_priors` where `"model_str"` is one of `{SIR, SIRDeltaD, SIUR, SEIUR}`.
+
+You can control which parameters to fit using the option `-partial -pto "parameters_str"`. The possible parameters depend on the selected model and are listed in the commands help (`optimise_likelihood_anymodel -h`).
+
+- To generate the MCMC chains, run then:
+
+`mcmc_anymodel "model_and_paramter_options"` where `"model_and_paramter_options"` are the model and parameter specifications previously run with `optimise_likelihood_anymodel`
 
 ## Folder structure
 - The `nottingham_covid_modelling/lib` folder contains modules used by the forward model: `data.py` retrieves stored Google mobility data and daily deaths, `equations.py` solves the SItD model difference equations, `error_measures.py` contains functions to calculate different error measures, `likelihood.py` and `priors.py` contain log-likelihood functions and priors, respectively, for different noise models, and `settings.py` contains default fixed parameter settings for the model.
