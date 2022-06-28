@@ -22,7 +22,7 @@ p.IFR = IFR_dict['United Kingdom']
 
 # Get Google travel and deaths data
 print('Getting data...')
-data = DataLoader(True, p, 'United Kingdom', data_dir=os.path.join(MODULE_DIR, '..', '..', 'data', 'archive', 'current'))
+data = DataLoader(True, p, 'United Kingdom', data_dir=os.path.join(MODULE_DIR, '..', 'data', 'archive', 'current'))
 shutil.rmtree('outcmaes')
 
 parameters_to_optimise = ['rho', 'Iinit1', 'lockdown_baseline', 'lockdown_offset', 'beta_mean', 'beta_var', 'death_mean', 'death_dispersion', 'IFR', 'negative_binomial_phi']
