@@ -17,6 +17,7 @@ We *strongly* recommend installing and running the scripts in a virtual environm
 - and activate `source ./bin/activate` (or `Scripts\activate` on Windows)
 - now get the source code from git: `git clone https://github.com/DGWhittaker/nottingham_covid_modelling.git`
 - go to repository folder and install the required packages by typing `pip install -r requirements.txt`
+- install PINTS separately by typing `pip install pints`
 - Now `pip install -e .` to install the *nottingham_covid_modelling* package itself
 
 ## Running SItD model
