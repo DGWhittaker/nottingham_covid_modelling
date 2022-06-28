@@ -23,7 +23,7 @@ setup(
     long_description=readme,
     license='BSD 3-clause license',
     author='Dominic Whittaker, Maurice Hendrix, Gary Mirams',
-    author_email='Dominic.Whittaker@nottingham.ac.uk, Maurice.Hendrix@nottingham.ac.uk, Gary.Mirams@nottingham.ac.uk',
+    author_email='Dominic.Whittaker1@nottingham.ac.uk, Maurice.Hendrix@nottingham.ac.uk, Gary.Mirams@nottingham.ac.uk',
     url='https://bitbucket.org/pmzspp/covid19-sp/src/master/python/',
     zip_safe=False,
 
@@ -62,6 +62,8 @@ setup(
             'nottingham_covid_modelling.plot_MCMC:plot_mcmc',
             'plot_mcmc_series='
             'nottingham_covid_modelling.plot_MCMC_series:plot_mcmc_series',
+            'plot_mcmc_series_posterior_samples='
+            'nottingham_covid_modelling.plot_MCMC_series_posterior_samples:plot_mcmc_series_posterior_samples',
             'plot_mcmc_series_map='
             'nottingham_covid_modelling.plot_MCMC_series_MAP:plot_mcmc_series_map',
             'plot_mcmc_series_nb_ll='
@@ -90,6 +92,12 @@ setup(
             'nottingham_covid_modelling.SIR_forward_model:SIR_forward_model',
             'hazards_exploration='
             'nottingham_covid_modelling.hazards_exploration:hazards_exploration',
+            'forward_model_forSIRtravel='
+            'nottingham_covid_modelling.forward_model_forSIRtravel:forward_model_forSIRtravel',
+            'SIR_SINR_fit_AGEdata='
+            'nottingham_covid_modelling.SIR_SINR_fit_AGEdata:run_optimise',
+            'SIR_SINR_fit_AGEdataNOnoise='
+            'nottingham_covid_modelling.SIR_SINR_fit_AGEdataNOnoise:run_optimise',
             'SIR_SINR_fit_ONSdata='
             'nottingham_covid_modelling.SIR_SINR_fit_DATA:run_optimise',
             'SIR_SINR_AGE_model_default='
