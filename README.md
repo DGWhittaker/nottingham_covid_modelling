@@ -117,7 +117,7 @@ In order to generate and save synthetic data for Figure 4-5, type the following:
 
 - `SIR_SINR_AGE_model_default -travel -step --outputnumbers FILENAME_WITH_FULL_PATH` 
 
-This will simulate the SItD model and some configuration of the simple models. The observation model will be simulated with a negative binomial distribution and saved as part of the SItD simulation. The exact data for Figure 3 can be found in `SItRDmodel_ONSparams_noise_NB_NO-R_travel_TRUE_step_TRUE.npy` in [nottingham_covid_modelling/out_SIRvsAGEfits](python/nottingham_covid_modelling/out_SIRvsAGEfits/).
+This will simulate the SItD model and some configuration of the simple models. The observation model will be simulated with a negative binomial distribution and saved as part of the SItD simulation. The exact data for Figure 3 can be found in `SItRDmodel_ONSparams_noise_NB_NO-R_travel_TRUE_step_TRUE.npy` in [nottingham_covid_modelling/out_SIRvsAGEfits](nottingham_covid_modelling/out_SIRvsAGEfits/).
 
   
 
@@ -162,7 +162,6 @@ In this last code, the MAPS for each model are saved.
 ### Figure 5
 
   Figure 5 is generated following the same steps as Figure 4, but adding the code for the corresponding fixed parameters. The exact code for the CMA-ES optimisation is:
-
   
 - `optimise_likelihood_anymodel --model_name SIR --informative_priors -r 100  --partial -pto rho Iinit1 --fixed_theta 0.1923` for the $SIRD$ model with $$\theta = 1/5.2 \approx  0.1923.$$.
 - `optimise_likelihood_anymodel --model_name SItD --informative_priors ` for the $SI_tD$ model.
@@ -170,7 +169,31 @@ In this last code, the MAPS for each model are saved.
 - `optimise_likelihood_anymodel --model_name SUIR --informative_priors -r 100 --partial -pto rho Iinit1 --fixed_theta 0.1923` for the $SUIRD$ model with $$\theta = 1/5.2 \approx  0.1923 , \quad \xi = 1/ (18.69 - 1 - 5.2.)$$
 - `optimise_likelihood_anymodel --model_name SEIUR --informative_priors -r 100 --partial -pto rho Iinit1 --fixed_eta 0.3362 --fixed_theta 0.3362` for the $SE^2I^2U^2RD$ model with $$\theta = \eta  = 1/2.974653 \approx 0.3362, \quad \xi =  1 / 11.744308.$$
   
-    [PLACEHOLDER]
+Then, we use the MAPS obtained before as initial step for 5 MCMC chains. To obtain the chains, run:
+ 
+ - `mcmc_anymodel --model_name SIR --informative_priors --out_mcmc out_mcmc_table2B --chains5 --partial -pto rho Iinit1 --fixed_theta 0.1923` for the $SIRD$ model
+- `mcmc_anymodel --model_name SItD --informative_priors --out_mcmc out_mcmc_table2B  --chains5` for the $SI_tD$ model
+- `mcmc_anymodel --model_name SIRD --informative_priors --out_mcmc out_mcmc_table2B --chains5 --partial -pto rho Iinit1 --fixed_theta 0.1923` for the $SIRD_{\Delta D}$ model
+- `mcmc_anymodel --model_name SUIR --informative_priors --out_mcmc out_mcmc_table2B  --chains5 --partial -pto rho Iinit1 --fixed_theta 0.1923` for the $SUIRD$ model
+- `mcmc_anymodel --model_name SEIUR --informative_priors --out_mcmc out_mcmc_table2B  --chains5 --partial -pto rho Iinit1 --fixed_theta 0.1923 --fixed_theta 0.3362` for the $SE^2I^2U^2RD$
+
+In this case, the chains are not as long as they were for figure 4 so the chain files are in the repository in  [nottingham_covid_modelling/out_mcmc_table2B](nottingham_covid_modelling/out_mcmc_table2B/). To create the eploratory plots run:
+
+- `plot_mcmc_anymodel --model_name "model_str" --informative_priors --out_mcmc out_mcmc_table2B --chains5 --partial -pto rho Iinit1 --fixed_theta 0.1923` for  `"model_str"` each of `{SIR, SIRDeltaD, SIUR}`.
+- `plot_mcmc_anymodel --model_name SItD --informative_priors --out_mcmc out_mcmc_table2B --chains5` for  the $SI_tD$ model`.
+- `plot_mcmc_anymodel --model_name SEIUR --informative_priors --out_mcmc out_mcmc_table2 --chains5 --partial -pto rho Iinit1 --fixed_theta 0.1923 --fixed_theta 0.3362` for the $SE^2I^2U^2RD$ model.
+
+ To calculate the derived parameters, run:
+  
+- `plot_mcmc_anyModel_derivedparams --model_name SItD --informative_priors --out_mcmc out_mcmc_table2 --chains5` for  $SI_tD$ model
+- `plot_mcmc_anyModel_derivedparams --model_name SItD --informative_priors --out_mcmc out_mcmc_table2 --chains5 --partial -pto rho Iinit1 --fixed_theta 0.1923` for  `"model_str"` each of `{SIR, SIRDeltaD, SIUR}`.
+- `plot_mcmc_anyModel_derivedparams --model_name SEIUR --informative_priors --out_mcmc out_mcmc_table2 --chains5 --partial -pto rho Iinit1 --fixed_theta 0.1923 --fixed_theta 0.3362` for  the $SEIURD$ model 
+  
+Then, figure 5 can be generated, along with prnting the second part of table 2, by running:
+
+ - `python nottingham_covid_modelling/figures/plot_figure4_table2B.py`
+
+In this last code, the MAPS for each model are saved.
 
 ### Figure 6
 As mentioned before, the results for Figure 6 rely on first obtaining an estimate of MAPs using CMA-ES optimisation to be used as a starting point for Bayesian inference using MCMC. To generate the necessary CMA-ES files, type:
