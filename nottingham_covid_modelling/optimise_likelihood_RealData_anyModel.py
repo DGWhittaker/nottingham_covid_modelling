@@ -74,7 +74,6 @@ def run_optimise():
     # For reproducibility:
     np.random.seed(100)
 
-
     # Get parameters, p
     p = Params()
     # Fixed for  UK google and ONS data:  
@@ -86,11 +85,6 @@ def run_optimise():
     p.numeric_max_age = 35
     p.extra_days_to_simulate = 10
     p.square_lockdown = True
-    #p.alpha = np.ones(p.maxtime)
-    #p.lockdown_baseline = 0.2814 #0.2042884852266899
-    #p.lockdown_offset = 31.57 #34.450147247864166
-
-    
 
     # Storing parameter values. Default values are given by  best the fit from Kirsty
     if ModelName != 'SItD':
