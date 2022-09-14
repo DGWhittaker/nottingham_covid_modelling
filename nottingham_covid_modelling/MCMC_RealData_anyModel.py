@@ -36,8 +36,8 @@ def run_mcmc():
                         OPTIONS FOR EACH MODEL ------ (1)SIR: rho Iinit1 theta; \
                         (2)SIRDeltaD: rho Iinit1 theta DeltaD; (3)SIUR: rho Iinit1 theta xi;  \
                         (4)SEIUR: rho Iinit1 theta eta xi; (5)SItD: rho Iinit1")
-    parser.add_argument("--fixed_eta", type=float, help="value of eta. If eta will be fitted this value is ignored. Default value is the best fit for SEIUR model to clinical data: 1/2.333971", default = 0.4285)#0.1923, 
-    parser.add_argument("--fixed_theta", type=float, help="value of theta. If theta in fitted params, this value is ignored.  Default value is the best fit for SEIUR model to clinical data: 1/3.839233", default=0.2605)    
+    parser.add_argument("--fixed_eta", type=float, help="value of eta. If eta will be fitted this value is ignored. Default value is the best fit for SEIUR model to clinical data:  1/2.974653", default = 0.3362)#0.1923,
+    parser.add_argument("--fixed_theta", type=float, help="value of theta. If theta in fitted params, this value is ignored.  Default value is the best fit for SEIUR model to clinical data: 1/2.974653", default=0.3362)       
     parser.add_argument("-fitstep", "--fit_step", action='store_false', help='Whether to fit step parameters', default=True)
     parser.add_argument("--informative_priors", action='store_true', help='Whether to use informative priors', default=False)
     parser.add_argument("--chains5", action='store_true', help='Whether to do 5 instead of 3 chains', default=False)
