@@ -56,10 +56,10 @@ def run_optimise():
 
 
     if FitFull:
-        print("Fitting full parameters, any subset of paramertes will be ignored. \nIf you want to fit only some parameters change -full and list -pto to fit ")
+        print("Fitting full parameters, any subset of paramertes will be ignored. \nIf you want to fit only some parameters change -partial and list -pto to fit ")
     else: 
         if params_fromOptions is None:
-            parser.error("If -full is false, -pto is required. You did not specify -pto.")
+            parser.error("If -partial, -pto is required. You did not specify -pto.")
 
     # Define the extra tag for filenames when eta or theta parameters are defined to a fixed value
     fixed_params_tag = "" 
