@@ -6,6 +6,8 @@ plt.rcParams['axes.axisbelow'] = True
 from datetime import datetime, timedelta, date
 import nottingham_covid_modelling.lib.priors as priors
 import numpy as np
+import pints
+import pints.io
 from nottingham_covid_modelling import MODULE_DIR
 from nottingham_covid_modelling.lib.data import DataLoader
 # Load project modules
