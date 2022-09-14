@@ -55,10 +55,10 @@ def plot_mcmc():
     Fixed_theta = args.fixed_theta
 
     if FitFull:
-        print("Fitting full parameters, any subset of parameters will be ignored. \nIf you want to fit only some parameters change -full and list -pto to fit ")
+        print("Fitting full parameters, any subset of parameters will be ignored. \nIf you want to fit only some parameters change -partial and list -pto to fit ")
     else: 
         if params_fromOptions is None:
-            parser.error("If -full is false, -pto is required. You did not specify -pto.")
+            parser.error("If -partial, -pto is required. You did not specify -pto.")
 
 
     fixed_params_tag = "" 

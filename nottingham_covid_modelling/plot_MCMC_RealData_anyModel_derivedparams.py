@@ -6,9 +6,8 @@ plt.rcParams['axes.axisbelow'] = True
 from datetime import datetime, timedelta, date
 import nottingham_covid_modelling.lib.priors as priors
 import numpy as np
-import pints
-import pints.io
 from nottingham_covid_modelling import MODULE_DIR
+from nottingham_covid_modelling.lib.data import DataLoader
 # Load project modules
 from nottingham_covid_modelling.lib._command_line_args import NOISE_MODEL_MAPPING, POPULATION
 from nottingham_covid_modelling.lib.equations import  get_model_SIUR_solution, get_model_solution, get_model_SIR_solution, get_model_SEIUR_solution
@@ -26,8 +25,8 @@ def plot_mcmc_derivedparams():
 
     parser.add_argument("--show_plots", action='store_true', help="whether to show plots or not", default=False)
     parser.add_argument("--model_name", type=str, help="which model to use", choices=MODEL_FUNCTIONS.keys(), default='SIR')
-    parser.add_argument("--out_mcmc", type=str, help="folder to store mcmc runs files in. This folder will be located ./folder, default: ./out-mcmc",
-                        default= 'out-mcmc')
+    parser.add_argument("--out_mcmc", type=str, help="folder to read/store mcmc runs files in, default: ./out-mcmc-SupTable2",
+                        default= 'out-mcmc-SupTable2')
     parser.add_argument("-partial", "--fit_partial", action='store_true', help='Whether to fit a subset of the model  parameters (see \"-pto\"), ', default=False)
     parser.add_argument("-pto", "--params_to_optimise", nargs='+', type=str,  \
                         help="If \"--fit_full\" is not given, select which parameters to optimise, e.g. -pto rho Iinit1 eta. This \
@@ -35,10 +34,9 @@ def plot_mcmc_derivedparams():
                         OPTIONS FOR EACH MODEL ------ (1)SIR: rho Iinit1 theta; \
                         (2)SIRDeltaD: rho Iinit1 theta DeltaD; (3)SIUR: rho Iinit1 theta xi;  \
                         (4)SEIUR: rho Iinit1 theta eta xi; (5)SItD: rho Iinit1")
-    parser.add_argument("--fixed_eta", type=float, help="value of eta. If eta will be fitted this value is ignored. Default value is the best fit for SEIUR model to clinical data: 1/2.333971", default = 0.4285)#0.1923,
-    parser.add_argument("--fixed_theta", type=float, help="value of theta. If theta in fitted params, this value is ignored.  Default value is the best fit for SEIUR model to clinical data: 1/3.839233", default=0.2605)    
+    parser.add_argument("--fixed_eta", type=float, help="value of eta. If eta will be fitted this value is ignored. Default value is the best fit for SEIUR model to clinical data:  1/2.974653", default = 0.3362)#0.1923,
+    parser.add_argument("--fixed_theta", type=float, help="value of theta. If theta in fitted params, this value is ignored.  Default value is the best fit for SEIUR model to clinical data: 1/2.974653", default=0.3362)       
     parser.add_argument("-fitstep", "--fit_step", action='store_false', help='Whether to fit step parameters', default=True)
-    parser.add_argument("--syndata_num", type=int, help="Give the number of the synthetic data set you want to fit, default 1", default=1)
     parser.add_argument("--burn_in", help="number of MCMC iterations to ignore",
                         default=25000, type=int)
     parser.add_argument("--chain", type=int, help="which chain to use", default=1)
@@ -51,7 +49,6 @@ def plot_mcmc_derivedparams():
     params_fromOptions = args.params_to_optimise
     FitStep = args.fit_step
     ModelName = args.model_name
-    SyntDataNum_file = args.syndata_num
     Fixed_eta = args.fixed_eta
     Fixed_theta = args.fixed_theta
 
@@ -76,28 +73,25 @@ def plot_mcmc_derivedparams():
         
     # For reproducibility:
     np.random.seed(100)
-    # Number of days to fit
-    maxtime_fit = 150
+    burn_in = args.burn_in
+    thinning_factor = 10
+
+    # For reproducibility:
+    np.random.seed(100)
 
     # Get parameters, p
     p = Params()
-    # Fixed for the synth data, based on UK google and ONS data:  
+    # Fixed for  UK google and ONS data:  
+    p.IFR = 0.00724 # UK time
+    p.n_days_to_simulate_after_150220 = 150
+    p.five_param_spline = False
     p.N = 59.1e6
+
     p.numeric_max_age = 35
     p.extra_days_to_simulate = 10
-    p.IFR = 0.00724 # UK time
     p.square_lockdown = True
-    p.alpha = np.ones(p.maxtime)
-    p.lockdown_baseline = 0.2814 #0.2042884852266899
-    p.lockdown_offset = 31.57 #34.450147247864166
     if not args.informative_priors:
         p.flat_priors = True
-    # For saving file names:
-    rho_label = '_rho_0-2'  
-    Noise_label = 'NBphi_2e-3_' 
-
-    burn_in = args.burn_in
-    thinning_factor = 10
 
     # Storing parameter values. Default values are given by  best the fit from Kirsty
     if ModelName != 'SItD':
@@ -117,61 +111,21 @@ def plot_mcmc_derivedparams():
     # define the params to optimize
     parameters_to_optimise = parameter_to_optimise_list(FitFull, FitStep, ModelName, params_fromOptions)
     parameter_names = get_parameter_names(parameters_to_optimise, FitStep)
-    print('Parameters estimated:')
-    print(parameters_to_optimise)
 
     # Get noise model
     noise_model = NOISE_MODEL_MAPPING['NegBinom']
 
-    # Get simulated Age data from file
-    print('Getting simulated data...')
-
-    # folder to load data
-    if SyntDataNum_file == 1: # Original default syntethic data
-        folder_path =  os.path.join(MODULE_DIR, 'out_SIRvsAGEfits')
-        full_fit_data_file = 'SItRDmodel_ONSparams_noise_NB_NO-R_travel_TRUE_step_TRUE.npy'
-    else:
-        folder_path =  os.path.join(MODULE_DIR, 'out_SIRvsAGE_SuplementaryFig')
-        full_fit_data_file = 'SynteticSItD_default_params_travel_TRUE_step_TRUE_' + str(SyntDataNum_file) + '.npy'
-    data_filename = full_fit_data_file
-    
-    # Load data
-    data = np.load(os.path.join(folder_path, data_filename ))
-    data_S = data[:,0]
-    data_Itot = data[:,1]
-    data_R = data[:,2]
-    data_Dreal = data[:,3]
-    data_D = data[:,4] # noise data
-    data_I = data[:,5:].T # transpose to get exactly the same shape as other code
-    
-    if len(data_R) < maxtime_fit:
-        p.maxtime = len(data_R) -1
-        maxtime_fit = len(data_R) -1
-    else:
-        p.maxtime = maxtime_fit
-    
-    # cut the data to the maxtime length:
-    data_D = data_D[:p.maxtime+1]
-    data_Dreal = data_Dreal[:p.maxtime+1]
-    data_S_long = data_S
-    data_S = data_S[:p.maxtime+1]
-    data_Itot = data_Itot[:p.maxtime+1]
-    data_R = data_R[:p.maxtime+1]
-    data_I = data_I[:,:p.maxtime+1]
-    
-    # to get the same data and fit lengths as in Data_loader
-    p.maxtime = p.maxtime + p.numeric_max_age + p.extra_days_to_simulate
-    p.day_1st_death_after_150220 = 22
+    # Get real data
+    print('Getting data...')
+    data = DataLoader(True, p, 'United Kingdom', data_dir=os.path.join(MODULE_DIR, '..', 'data', 'archive', 'current'))
+    data_D = data.daily_deaths
 
     if FitFull:
-        filename = get_file_name_suffix(p, 'SimSItD-' + str(SyntDataNum_file) + rho_label, Noise_label + \
-             'model-' + ModelName + '_full-fit-' + str(FitFull), parameters_to_optimise)
+        filename1 = get_file_name_suffix(p, 'ONS-UK', 'model-' + ModelName + '_full-fit-' + str(FitFull), parameters_to_optimise)
     else:
-        filename = get_file_name_suffix_anymodel(p, 'SimSItD-' + str(SyntDataNum_file), rho_label, Noise_label, ModelName , parameters_to_optimise)
-    filename = filename + fixed_params_tag
-
+        filename1 = get_file_name_suffix_anymodel(p, 'ONS-UK', '','', ModelName , parameters_to_optimise)
+    filename = filename1 + fixed_params_tag
     folder = args.out_mcmc
-    
     filename_epiparams = os.path.join(MODULE_DIR, folder, filename + '_epiParams_chain_' + str(args.chain) + '_burnIn_' + str(burn_in) + '_thinning_' + str(thinning_factor) + '.npy')
 
     if os.path.exists(filename_epiparams):
