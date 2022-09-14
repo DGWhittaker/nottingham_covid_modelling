@@ -118,6 +118,10 @@ setup(
             'nottingham_covid_modelling.optimise_likelihood_RealData_anyModel:run_optimise',
             'mcmc_realdata_anyModel='
             'nottingham_covid_modelling.MCMC_RealData_anyModel:run_mcmc',
+            'plot_mcmc_realdata_anyModel='
+            'nottingham_covid_modelling.plot_MCMC_RealData_anyModel:plot_mcmc',
+            'plot_mcmc_realdata_anyModel_derivedparams='
+            'nottingham_covid_modelling.plot_MCMC_RealData_anyModel_derivedparams:plot_mcmc_derivedparams'
         ],
     },
 )
