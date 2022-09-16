@@ -86,8 +86,7 @@ if not os.path.exists(fig_path):
 
 plt.rcParams.update({'font.size': 10})
 # Definiiton of parameters and  fits
-folder_fits = os.path.join(MODULE_DIR, 'out-mcmc-table2')
-folder_data = os.path.join(MODULE_DIR, 'out_SIRvsAGEfits')
+
 default_chain = 1
 burn_in = 25000
 Model_name = ['SItD', 'SIR', 'SIRDeltaD', 'SIUR', 'SEIUR', 'SEIUR']
