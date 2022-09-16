@@ -129,7 +129,10 @@ table_2_derived = np.zeros([6,5])
 Feb15 = datetime.strptime("15-02-2020", "%d-%m-%Y").date()
 date_list = [Feb15 + timedelta(days=x) for x in range(p.maxtime+1)]
 # time
-t = np.linspace(0, p.maxtime-1, p.maxtime)
+maxtime_fit = p.maxtime -(p.numeric_max_age + p.extra_days_to_simulate)
+t =  np.linspace(0, maxtime_fit + 1, maxtime_fit )
+t_daily = np.linspace(p.day_1st_death_after_150220, p.maxtime - (p.numeric_max_age + p.extra_days_to_simulate), \
+        (p.maxtime - p.day_1st_death_after_150220 - (p.numeric_max_age + p.extra_days_to_simulate) + 1))
 
 fig = plt.figure(figsize=(8.0, 11), dpi=200)
 grid = gridspec.GridSpec(2,1)
@@ -138,7 +141,7 @@ grid1 =grid[1].subgridspec(2, 1, hspace=0.35)
 ax = fig.add_subplot(grid0[1])
 ax2 = fig.add_subplot(grid0[0])
 ax4 =  fig.add_subplot(grid0[2])
-ax2.plot(t[p.day_1st_death_after_150220:], data_D,'b.', label = 'Data')
+ax2.plot(t_daily, data_D,'b.', label = 'Data')
 
 params_opt_names = {}
 for i, model_i in enumerate(Model_name): 
@@ -201,11 +204,11 @@ for i, model_i in enumerate(Model_name):
         else:
             S, I, New_I, R, D = solve_SIR_difference_equations(p, p_dic_model_i, travel_data)
         R_eff = ((rho_fit * alpha) / theta_fit) * (S / p.N)
-    table_2_derived[i,:] = [round(R_0,2),round(min(R_eff),2), np.where(R_eff<1)[0][0], round(np.max(New_I[:p.maxtime])/1000,1), round(S[-1]/p.N, 3)]
+    table_2_derived[i,:] = [round(R_0,2),round(min(R_eff),2), np.where(R_eff<1)[0][0], round(np.max(New_I[:maxtime_fit])/1000,1), round(S[-1]/p.N, 3)]
 
-    ax.plot(t, New_I[:p.maxtime], label = Model_label[i])
-    ax2.plot(t, D[:p.maxtime], label = Model_label[i])
-    ax4.plot(R_eff[:p.maxtime]  , label = Model_label[i] + r' $R_0 =$ ' + str( round(R_0, 2)))
+    ax.plot(t, New_I[:maxtime_fit], label = Model_label[i])
+    ax2.plot(t, D[:maxtime_fit], label = Model_label[i])
+    ax4.plot(R_eff[:maxtime_fit]  , label = Model_label[i] + r' $R_0 =$ ' + str( round(R_0, 2)))
 
 ax.set_ylabel('Daily new infections')
 ax.set_xticks([x for x in (0, 40, 80, 120) if x < len(date_list)])
