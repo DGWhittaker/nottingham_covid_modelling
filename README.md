@@ -3,7 +3,7 @@
 This folder contains a python implementation of a SItD (susceptible-infected-deceased) compartmental epidemiological model structured by infectious age.
 The code herein is associated with the paper:
 
-***"Uncertainty and error in SARS-CoV-2 epidemiological parameters inferred from population-level epidemic models"*** (Currently under review). Whittaker, D. G.\*, Herrera-Reyes, A. D.\*, Hendrix, M., Owen, M. R., Band, L. R., Mirams, G. R., Bolton, K. J., Preston, S. P.
+***"Uncertainty and error in SARS-CoV-2 epidemiological parameters inferred from population-level epidemic models"***. Whittaker, D. G.\*, Herrera-Reyes, A. D.\*, Hendrix, M., Owen, M. R., Band, L. R., Mirams, G. R., Bolton, K. J., Preston, S. P. *J Theor Biol*, 2023, 111337.
 
 \* joint first authors
 
@@ -234,5 +234,5 @@ in the aforementioned directory will plot and save separately the constituent pa
 
 If you publish any work based on the contents of this repository please cite:
 
-[PLACEHOLDER]
+Whittaker, D. G., Herrera-Reyes, A. D., Hendrix, M., Owen, M. R., Band, L. R., Mirams, G. R., Bolton, K. J., Preston, S. P. [Uncertainty and error in SARS-CoV-2 epidemiological parameters inferred from population-level epidemic models](https://doi.org/10.1016/j.jtbi.2022.111337). *J Theor Biol*, 2023, 111337.
 
